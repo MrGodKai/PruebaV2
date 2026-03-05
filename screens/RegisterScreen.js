@@ -6,7 +6,8 @@ import { ref, get } from 'firebase/database';
 export default function RegisterScreen({ onRegister, goBack }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
+  // El rol siempre será 'user' por defecto
+  const role = 'user';
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -56,17 +57,7 @@ export default function RegisterScreen({ onRegister, goBack }) {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <View style={styles.roles}>
-        <TouchableOpacity style={[styles.roleBtn, role === 'user' && styles.selectedRole]} onPress={() => setRole('user')}>
-          <Text style={styles.roleText}>Usuario</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.roleBtn, role === 'mechanic' && styles.selectedRole]} onPress={() => setRole('mechanic')}>
-          <Text style={styles.roleText}>Mecánico</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.roleBtn, role === 'admin' && styles.selectedRole]} onPress={() => setRole('admin')}>
-          <Text style={styles.roleText}>Administrador</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Opción de rol eliminada, todos los registros serán usuario normal */}
       {error ? <Text style={styles.error}>{error}</Text> : null}
       {success ? <Text style={{ color: 'green', marginBottom: 10 }}>{success}</Text> : null}
       <TouchableOpacity style={styles.registerBtn} onPress={handleRegister}>

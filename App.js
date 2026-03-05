@@ -1,3 +1,4 @@
+import GroupChatScreen from './screens/GroupChatScreen';
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -8,6 +9,7 @@ import MechanicScreen from './screens/MechanicScreen';
 import UserScreen from './screens/UserScreen';
 import ChatScreen from './screens/ChatScreen';
 import OnlineUsersScreen from './screens/OnlineUsersScreen';
+import GroupsScreen from './screens/GroupsScreen';
 
 const Stack = createStackNavigator();
 
@@ -67,8 +69,26 @@ export default function App() {
                 // Pantalla principal según rol
                 if (role === 'admin') return <AdminScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} />;
                 if (role === 'mechanic') return <MechanicScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} />;
-                return <UserScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} currentUsername={currentUsername} />;
+                return <UserScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} goToGroups={() => props.navigation.navigate('Groups')} currentUsername={currentUsername} />;
               }}
+            </Stack.Screen>
+            <Stack.Screen name="Groups">
+              {props => (
+                <GroupsScreen
+                  {...props}
+                  currentUser={currentUsername}
+                  goToGroupChat={(groupId, groupName) => props.navigation.navigate('GroupChat', { groupId, groupName })}
+                  goBack={() => props.navigation.goBack()}
+                />
+              )}
+            </Stack.Screen>
+            <Stack.Screen name="GroupChat">
+              {props => (
+                <GroupChatScreen
+                  {...props}
+                  route={{...props.route, params: { ...props.route.params, currentUser: currentUsername }}}
+                />
+              )}
             </Stack.Screen>
             <Stack.Screen name="OnlineUsers">
               {props => (

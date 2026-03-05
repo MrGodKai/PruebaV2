@@ -1,4 +1,25 @@
 {
   "name": "PowerCar",
-  "displayName": "PowerCar"
+  "displayName": "PowerCar",
+  "extra": {
+    "eas": {
+      "projectId": "06e03514-046f-410b-95d0-ca5cb1a83007"
+    }
+  },
+  "expo": {
+    "android": {
+      "package": "com.pipingo.powercar"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "06e03514-046f-410b-95d0-ca5cb1a83007"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.pipingo.powercar",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    }
+  }
 }

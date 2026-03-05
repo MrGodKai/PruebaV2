@@ -1,1 +1,21 @@
-node_modules
+node_modules/
+.expo/
+.expo-shared/
+.env
+*.log
+.DS_Store
+*.expo
+*.keystore
+*.jks
+*.p8
+*.p12
+*.key
+*.pem
+*.crt
+*.der
+*.bak
+*.tmp
+.idea/
+.vscode/
+# Firebase config (no subas tus claves reales)
+firebaseConfig.js
