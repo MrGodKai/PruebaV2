@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { db } from '../firebaseConfig';
 import { ref, get } from 'firebase/database';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Image } from 'react-native';
 
 const roles = [
   { label: 'Administrador', value: 'admin' },
@@ -34,7 +34,14 @@ export default function LoginScreen({ setRole, goToRegister, users, goBack, setC
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={{flex:1}}>
+      <View style={styles.container}>
+      <View style={{alignItems: 'center', marginBottom: 20}}>
+        <Image
+          source={require('../assets/user-icon.png')}
+          style={{width: 100, height: 100, marginBottom: 10}}
+        />
+      </View>
       <Text style={styles.title}>PowerCar Login</Text>
       <TextInput
         style={styles.input}
@@ -62,6 +69,7 @@ export default function LoginScreen({ setRole, goToRegister, users, goBack, setC
         </TouchableOpacity>
       )}
     </View>
+    </SafeAreaView>
   );
 }
 

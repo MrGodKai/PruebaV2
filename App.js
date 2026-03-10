@@ -10,6 +10,12 @@ import UserScreen from './screens/UserScreen';
 import ChatScreen from './screens/ChatScreen';
 import OnlineUsersScreen from './screens/OnlineUsersScreen';
 import GroupsScreen from './screens/GroupsScreen';
+import HomeScreen from './screens/HomeScreen';
+import AboutScreen from './screens/AboutScreen';
+import ProductScreen from './screens/ProductScreen';
+import ServiceScreen from './screens/ServiceScreen';
+import ContactScreen from './screens/ContactScreen';
+import AppointmentScreen from './screens/AppointmentScreen';
 
 const Stack = createStackNavigator();
 
@@ -69,7 +75,7 @@ export default function App() {
                 // Pantalla principal según rol
                 if (role === 'admin') return <AdminScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} />;
                 if (role === 'mechanic') return <MechanicScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} />;
-                return <UserScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} goToGroups={() => props.navigation.navigate('Groups')} currentUsername={currentUsername} />;
+                return <HomeScreen {...props} navigation={props.navigation} />;
               }}
             </Stack.Screen>
             <Stack.Screen name="Groups">
@@ -105,6 +111,14 @@ export default function App() {
                 const otherUser = props.route.params?.otherUser || '';
                 return <ChatScreen {...props} user={currentUsername} mechanic={otherUser} goBack={() => props.navigation.goBack()} />;
               }}
+            </Stack.Screen>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="About" component={AboutScreen} />
+            <Stack.Screen name="Products" component={ProductScreen} />
+            <Stack.Screen name="Services" component={ServiceScreen} />
+            <Stack.Screen name="Contact" component={ContactScreen} />
+            <Stack.Screen name="Appointment">
+              {props => <AppointmentScreen {...props} currentUsername={currentUsername} />}
             </Stack.Screen>
           </>
         )}
