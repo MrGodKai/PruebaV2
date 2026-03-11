@@ -1,4 +1,3 @@
-import GroupChatScreen from './screens/GroupChatScreen';
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -10,12 +9,16 @@ import UserScreen from './screens/UserScreen';
 import ChatScreen from './screens/ChatScreen';
 import OnlineUsersScreen from './screens/OnlineUsersScreen';
 import GroupsScreen from './screens/GroupsScreen';
+import GroupChatScreen from './screens/GroupChatScreen';
 import HomeScreen from './screens/HomeScreen';
 import AboutScreen from './screens/AboutScreen';
-import ProductScreen from './screens/ProductScreen';
-import ServiceScreen from './screens/ServiceScreen';
+import ProductsScreen from './screens/ProductsScreen';
+import CartScreen from './screens/CartScreen';
+import ServicesScreen from './screens/ServicesScreen';
 import ContactScreen from './screens/ContactScreen';
 import AppointmentScreen from './screens/AppointmentScreen';
+import { CartProvider } from './CartContext';
+
 
 const Stack = createStackNavigator();
 
@@ -30,7 +33,8 @@ export default function App() {
   ]);
 
   return (
-    <NavigationContainer>
+    <CartProvider>
+      <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {!role && !showRegister ? (
           <Stack.Screen name="Login">
@@ -114,15 +118,22 @@ export default function App() {
             </Stack.Screen>
             <Stack.Screen name="Home" component={HomeScreen} />
             <Stack.Screen name="About" component={AboutScreen} />
-            <Stack.Screen name="Products" component={ProductScreen} />
-            <Stack.Screen name="Services" component={ServiceScreen} />
+            <Stack.Screen name="Products" component={ProductsScreen} />
+            <Stack.Screen name="Cart" component={CartScreen} />
+            <Stack.Screen name="Services" component={ServicesScreen} />
             <Stack.Screen name="Contact" component={ContactScreen} />
             <Stack.Screen name="Appointment">
-              {props => <AppointmentScreen {...props} currentUsername={currentUsername} />}
+              {props => (
+                <AppointmentScreen
+                  {...props}
+                  currentUsername={currentUsername}
+                />
+              )}
             </Stack.Screen>
           </>
         )}
       </Stack.Navigator>
     </NavigationContainer>
+    </CartProvider>
   );
 }

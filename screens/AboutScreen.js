@@ -1,96 +1,172 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function AboutScreen({ navigation }) {
-  const timeline = [
-    { year: '2010', title: 'Fundación', description: 'Iniciamos operaciones con un pequeño taller familiar.' },
-    { year: '2015', title: 'Expansión', description: 'Ampliamos nuestras instalaciones y equipo.' },
-    { year: '2020', title: 'Tecnología', description: 'Incorporamos herramientas de diagnóstico avanzadas.' },
-    { year: '2023', title: 'Certificación', description: 'Obtuvimos certificaciones internacionales.' },
-    { year: '2024', title: 'Crecimiento', description: 'Abrimos sucursales en otras ciudades.' }
-  ];
-
-  const gallery = [
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    'https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200&q=80',
-    // Add more images
-  ];
-
   return (
-    <SafeAreaView style={{flex:1}}>
+    <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#007bff" />
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#007bff" />
+          </TouchableOpacity>
+          <Text style={styles.headerText}>Nuestra Historia</Text>
+        </View>
+
+        <Text style={styles.title}>Sobre PowerCAR</Text>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Nuestra Misión</Text>
+          <Text style={styles.text}>
+            En PowerCAR, nos comprometemos a proporcionar servicios de reparación y mantenimiento automotriz de la más alta calidad. Nuestro equipo de profesionales certificados trabaja con las mejores tecnologías para garantizar que tu vehículo esté en perfecto estado.
+          </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Nuestros Valores</Text>
+          <View style={styles.valueItem}>
+            <Ionicons name="shield-checkmark" size={24} color="#ff4500" />
+            <Text style={styles.valueText}>Calidad: Garantizamos el mejor servicio</Text>
+          </View>
+          <View style={styles.valueItem}>
+            <Ionicons name="people" size={24} color="#ff4500" />
+            <Text style={styles.valueText}>Profesionalismo: Equipo capacitado y certificado</Text>
+          </View>
+          <View style={styles.valueItem}>
+            <Ionicons name="time" size={24} color="#ff4500" />
+            <Text style={styles.valueText}>Puntualidad: Entrega en el tiempo acordado</Text>
+          </View>
+          <View style={styles.valueItem}>
+            <Ionicons name="cash" size={24} color="#ff4500" />
+            <Text style={styles.valueText}>Precios justos: Transparencia en nuestros costos</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Nuestro Equipo</Text>
+          <Text style={styles.text}>
+            Contamos con un equipo de mecánicos expertos con más de 15 años de experiencia en el ramo automotriz. Nuestros profesionales se mantienen constantemente actualizados con las últimas tecnologías y técnicas de reparación.
+          </Text>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Servicios Destacados</Text>
+          <View style={styles.serviceList}>
+            <Text style={styles.serviceItem}>✓ Mantenimiento general</Text>
+            <Text style={styles.serviceItem}>✓ Diagnóstico computarizado</Text>
+            <Text style={styles.serviceItem}>✓ Reparación de motores</Text>
+            <Text style={styles.serviceItem}>✓ Sistema de frenos</Text>
+            <Text style={styles.serviceItem}>✓ Suspensión y alineación</Text>
+            <Text style={styles.serviceItem}>✓ Sistema eléctrico</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Ubicación y Contacto</Text>
+          <Text style={styles.text}>
+            <Ionicons name="location" size={16} color="#ff4500" /> San José, Costa Rica
+          </Text>
+          <Text style={styles.text}>
+            <Ionicons name="call" size={16} color="#ff4500" /> Tel: 8888-8888
+          </Text>
+          <Text style={styles.text}>
+            <Ionicons name="mail" size={16} color="#ff4500" /> Email: taller@powercar.com
+          </Text>
+        </View>
+
+        <TouchableOpacity style={styles.contactBtn} onPress={() => navigation.navigate('Contact')}>
+          <Text style={styles.contactText}>Contáctanos</Text>
         </TouchableOpacity>
-        <Text style={styles.headerText}>Nuestra Historia</Text>
-      </View>
-      <View style={styles.hero}>
-        <Text style={styles.heroTitle}>Nuestra <Text style={styles.heroSpan}>Historia</Text></Text>
-      </View>
 
-      <View style={styles.content}>
-        <View style={styles.timeline}>
-          {timeline.map((item, index) => (
-            <View key={index} style={styles.timelineItem}>
-              <View style={styles.marker}>
-                <Text style={styles.year}>{item.year}</Text>
-              </View>
-              <View style={styles.timelineContent}>
-                <Text style={styles.title}>{item.title}</Text>
-                <Text style={styles.description}>{item.description}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.gallery}>
-        <Text style={styles.galleryTitle}>Galería</Text>
-        <View style={styles.grid}>
-          {gallery.map((uri, index) => (
-            <Image key={index} source={{ uri }} style={styles.image} />
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Redes Sociales</Text>
-        <View style={styles.social}>
-          <Ionicons name="logo-facebook" size={24} color="#007bff" />
-          <Ionicons name="logo-instagram" size={24} color="#007bff" />
-          <Ionicons name="logo-whatsapp" size={24} color="#007bff" />
-        </View>
-        <Text style={styles.footerText}>Contacto: Tel: 8888-8888 | Email: taller@email.com</Text>
-        <Text style={styles.footerText}>Ubicación: Costa Rica</Text>
-      </View>
-    </ScrollView>
+        <View style={{ height: 40 }} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { flexDirection: 'row', alignItems: 'center', padding: 10, backgroundColor: '#f0f0f0' },
-  headerText: { fontSize: 20, fontWeight: 'bold', color: '#007bff', marginLeft: 10 },
-  hero: { backgroundColor: '#007bff', padding: 20, alignItems: 'center' },
-  heroTitle: { fontSize: 28, color: '#fff', fontWeight: 'bold' },
-  heroSpan: { color: '#fff' },
-  content: { padding: 20 },
-  timeline: { position: 'relative' },
-  timelineItem: { flexDirection: 'row', marginBottom: 20 },
-  marker: { width: 60, height: 60, borderRadius: 30, backgroundColor: '#007bff', alignItems: 'center', justifyContent: 'center', marginRight: 20 },
-  year: { color: '#fff', fontWeight: 'bold' },
-  timelineContent: { flex: 1 },
-  title: { fontSize: 18, fontWeight: 'bold' },
-  description: { fontSize: 14, marginTop: 5 },
-  gallery: { padding: 20 },
-  galleryTitle: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  image: { width: '30%', height: 100, marginBottom: 10 },
-  footer: { padding: 20, alignItems: 'center' },
-  footerText: { fontSize: 14, marginVertical: 5 },
-  social: { flexDirection: 'row', justifyContent: 'space-around', width: 100 },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 20
+  },
+
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20
+  },
+
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginLeft: 10
+  },
+
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#007bff',
+    textAlign: 'center',
+    marginBottom: 30
+  },
+
+  section: {
+    marginBottom: 25,
+    padding: 15,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#007bff',
+    marginBottom: 10
+  },
+
+  text: {
+    fontSize: 16,
+    color: '#333',
+    lineHeight: 24
+  },
+
+  valueItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    paddingVertical: 8
+  },
+
+  valueText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 12,
+    flex: 1
+  },
+
+  serviceList: {
+    marginTop: 10
+  },
+
+  serviceItem: {
+    fontSize: 16,
+    color: '#333',
+    marginVertical: 6,
+    lineHeight: 22
+  },
+
+  contactBtn: {
+    backgroundColor: '#007bff',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 20
+  },
+
+  contactText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16
+  }
 });

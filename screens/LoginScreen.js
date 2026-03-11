@@ -34,58 +34,140 @@ export default function LoginScreen({ setRole, goToRegister, users, goBack, setC
   };
 
   return (
-    <SafeAreaView style={{flex:1}}>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-      <View style={{alignItems: 'center', marginBottom: 20}}>
-        <Image
-          source={require('../assets/user-icon.png')}
-          style={{width: 100, height: 100, marginBottom: 10}}
+
+        <View style={{ alignItems: 'center', marginBottom: 20 }}>
+          <Image
+            source={require('../assets/user-icon.png')}
+            style={{ width: 100, height: 100, marginBottom: 10 }}
+          />
+        </View>
+
+        <Text style={styles.title}>PowerCar Login</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Usuario"
+          value={username}
+          onChangeText={setUsername}
         />
-      </View>
-      <Text style={styles.title}>PowerCar Login</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Usuario"
-        value={username}
-        onChangeText={setUsername}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Contraseña"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
-        <Text style={styles.loginText}>Ingresar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.registerBtn} onPress={goToRegister}>
-        <Text style={styles.registerText}>Registrarse</Text>
-      </TouchableOpacity>
-      {goBack && (
-        <TouchableOpacity style={styles.backBtn} onPress={goBack}>
-          <Text style={styles.backText}>Volver</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Contraseña"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+        <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
+          <Text style={styles.loginText}>Ingresar</Text>
         </TouchableOpacity>
-      )}
-    </View>
+
+        <TouchableOpacity style={styles.registerBtn} onPress={goToRegister}>
+          <Text style={styles.registerText}>Registrarse</Text>
+        </TouchableOpacity>
+
+        {goBack && (
+          <TouchableOpacity style={styles.backBtn} onPress={goBack}>
+            <Text style={styles.backText}>Volver</Text>
+          </TouchableOpacity>
+        )}
+
+      </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' },
-  title: { fontSize: 28, fontWeight: 'bold', marginBottom: 30 },
-  input: { width: 250, height: 40, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, marginBottom: 15, paddingHorizontal: 10 },
-  roles: { flexDirection: 'row', marginBottom: 20 },
-  roleBtn: { padding: 10, marginHorizontal: 5, borderRadius: 8, borderWidth: 1, borderColor: '#888' },
-  selectedRole: { backgroundColor: '#007bff', borderColor: '#007bff' },
-  roleText: { color: '#333' },
-  loginBtn: { backgroundColor: '#007bff', padding: 12, borderRadius: 8, marginBottom: 10 },
-  loginText: { color: '#fff', fontWeight: 'bold' },
-  registerBtn: { backgroundColor: '#28a745', padding: 10, borderRadius: 8 },
-  registerText: { color: '#fff', fontWeight: 'bold' },
-  error: { color: 'red', marginBottom: 10 },
-  backBtn: { backgroundColor: '#ccc', padding: 10, borderRadius: 8, marginTop: 10 },
-  backText: { color: '#333' }
+  container: { 
+    flex: 1, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    backgroundColor: '#f5f5f5', 
+    padding: 20 
+  },
+  image: { 
+    width: 150, 
+    height: 150, 
+    marginBottom: 20, 
+    borderRadius: 75 
+  },
+  title: { 
+    fontSize: 32, 
+    fontWeight: 'bold', 
+    marginBottom: 40, 
+    color: '#333', 
+    textAlign: 'center' 
+  },
+  input: { 
+    width: '100%', 
+    maxWidth: 300, 
+    height: 50, 
+    borderWidth: 1, 
+    borderColor: '#ddd', 
+    borderRadius: 10, 
+    marginBottom: 20, 
+    paddingHorizontal: 15, 
+    backgroundColor: '#fff', 
+    fontSize: 16 
+  },
+  error: { 
+    color: '#e74c3c', 
+    marginBottom: 20, 
+    fontSize: 14, 
+    textAlign: 'center' 
+  },
+  loginBtn: { 
+    backgroundColor: '#3498db', 
+    paddingVertical: 15, 
+    paddingHorizontal: 30, 
+    borderRadius: 10, 
+    marginBottom: 15, 
+    width: '100%', 
+    maxWidth: 300, 
+    alignItems: 'center', 
+    shadowColor: '#000', 
+    shadowOffset: { width: 0, height: 2 }, 
+    shadowOpacity: 0.2, 
+    shadowRadius: 3, 
+    elevation: 5 
+  },
+  loginText: { 
+    color: '#fff', 
+    fontWeight: 'bold', 
+    fontSize: 16 
+  },
+  registerBtn: { 
+    backgroundColor: '#2ecc71', 
+    paddingVertical: 12, 
+    paddingHorizontal: 30, 
+    borderRadius: 10, 
+    width: '100%', 
+    maxWidth: 300, 
+    alignItems: 'center' 
+  },
+  registerText: { 
+    color: '#fff', 
+    fontWeight: 'bold', 
+    fontSize: 16 
+  },
+  backBtn: { 
+    backgroundColor: '#95a5a6', 
+    paddingVertical: 12, 
+    paddingHorizontal: 30, 
+    borderRadius: 10, 
+    marginTop: 20, 
+    width: '100%', 
+    maxWidth: 300, 
+    alignItems: 'center' 
+  },
+  backText: { 
+    color: '#fff', 
+    fontWeight: 'bold', 
+    fontSize: 16 
+  }
 });
