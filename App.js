@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { View, TouchableOpacity, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -19,60 +20,149 @@ import CartScreen from './screens/CartScreen';
 import ServicesScreen from './screens/ServicesScreen';
 import ContactScreen from './screens/ContactScreen';
 import AppointmentScreen from './screens/AppointmentScreen';
+import AccountScreen from './screens/AccountScreen';
+import MechanicAppointmentsScreen from './screens/MechanicAppointmentsScreen';
 import { CartProvider } from './CartContext';
 
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
+const ALLOWED_ROLES = ['admin', 'mechanic', 'user'];
 
-function UserTabs({ currentUsername }) {
+function UserTabs({ currentUsername, currentRole, rootNavigation, onLogout }) {
+  const [fabVisible, setFabVisible] = useState(true);
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: '#007bff',
-        tabBarInactiveTintColor: '#666',
-        tabBarShowLabel: true,
-        tabBarLabelStyle: {
-          fontSize: 10,
-          marginBottom: 3
-        },
-        tabBarItemStyle: {
-          paddingHorizontal: 2
-        },
-        tabBarStyle: {
-          position: 'absolute',
-          left: 10,
-          right: 10,
-          bottom: 14,
-          height: 66,
-          paddingBottom: 6,
-          paddingTop: 6,
-          borderRadius: 14
-        },
-        tabBarIcon: ({ color, size }) => {
-          let iconName = 'ellipse';
+    <View style={{ flex: 1 }}>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarActiveTintColor: '#007bff',
+          tabBarInactiveTintColor: '#666',
+          tabBarShowLabel: true,
+          tabBarLabelStyle: {
+            fontSize: 10,
+            marginBottom: 3
+          },
+          tabBarItemStyle: {
+            paddingHorizontal: 2
+          },
+          tabBarStyle: {
+            position: 'absolute',
+            left: 10,
+            right: 10,
+            bottom: 14,
+            height: 66,
+            paddingBottom: 6,
+            paddingTop: 6,
+            borderRadius: 14
+          },
+          tabBarIcon: ({ color, size }) => {
+            let iconName = 'ellipse';
 
-          if (route.name === 'Home') iconName = 'home';
-          if (route.name === 'About') iconName = 'information-circle';
-          if (route.name === 'Products') iconName = 'cart';
-          if (route.name === 'Services') iconName = 'build';
-          if (route.name === 'Appointment') iconName = 'calendar';
-          if (route.name === 'Contact') iconName = 'call';
+            if (route.name === 'Home') iconName = 'home';
+            if (route.name === 'About') iconName = 'information-circle';
+            if (route.name === 'Products') iconName = 'cart';
+            if (route.name === 'Services') iconName = 'build';
+            if (route.name === 'Appointment') iconName = 'calendar';
+            if (route.name === 'Contact') iconName = 'call';
+            if (route.name === 'Account') iconName = 'person-circle';
 
-          return <Ionicons name={iconName} size={22} color={color} />;
-        }
-      })}
-    >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Inicio' }} />
-      <Tab.Screen name="Products" component={ProductsScreen} options={{ tabBarLabel: 'Productos' }} />
-      <Tab.Screen name="Services" component={ServicesScreen} options={{ tabBarLabel: 'Servicios' }} />
-      <Tab.Screen name="Appointment" options={{ tabBarLabel: 'Citas' }}>
-        {props => <AppointmentScreen {...props} currentUsername={currentUsername} />}
-      </Tab.Screen>
-      <Tab.Screen name="Contact" component={ContactScreen} options={{ tabBarLabel: 'Contacto' }} />
-      <Tab.Screen name="About" component={AboutScreen} options={{ tabBarLabel: 'Historia' }} />
-    </Tab.Navigator>
+            return <Ionicons name={iconName} size={22} color={color} />;
+          }
+        })}
+      >
+        <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Inicio' }} />
+        <Tab.Screen name="Products" component={ProductsScreen} options={{ tabBarLabel: 'Productos' }} />
+        <Tab.Screen name="Services" component={ServicesScreen} options={{ tabBarLabel: 'Servicios' }} />
+        <Tab.Screen name="Appointment" options={{ tabBarLabel: 'Citas' }}>
+          {props => <AppointmentScreen {...props} currentUsername={currentUsername} />}
+        </Tab.Screen>
+        <Tab.Screen name="Contact" component={ContactScreen} options={{ tabBarLabel: 'Contacto' }} />
+        <Tab.Screen name="Account" options={{ tabBarLabel: 'Cuenta' }}>
+          {props => (
+            <AccountScreen
+              {...props}
+              currentUsername={currentUsername}
+              currentRole={currentRole}
+              onLogout={onLogout}
+            />
+          )}
+        </Tab.Screen>
+        <Tab.Screen name="About" component={AboutScreen} options={{ tabBarLabel: 'Historia' }} />
+      </Tab.Navigator>
+
+      {fabVisible ? (
+        /* Main tab */
+        <View
+          style={{
+            position: 'absolute',
+            right: 0,
+            bottom: 116,
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: '#2a9d8f',
+            borderTopLeftRadius: 14,
+            borderBottomLeftRadius: 14,
+            elevation: 8,
+            shadowColor: '#000',
+            shadowOpacity: 0.25,
+            shadowRadius: 5,
+            shadowOffset: { width: 0, height: 2 }
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => rootNavigation.navigate('Groups')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingVertical: 12,
+              paddingLeft: 12,
+              paddingRight: 8,
+            }}
+          >
+            <Ionicons name="chatbubble-ellipses" size={20} color="#fff" />
+            <Text style={{ color: '#fff', fontWeight: '700', fontSize: 13, marginLeft: 7 }}>
+              Seguimiento
+            </Text>
+          </TouchableOpacity>
+
+          {/* Hide button */}
+          <TouchableOpacity
+            onPress={() => setFabVisible(false)}
+            style={{
+              paddingVertical: 12,
+              paddingLeft: 4,
+              paddingRight: 10,
+            }}
+          >
+            <Ionicons name="close" size={16} color="rgba(255,255,255,0.8)" />
+          </TouchableOpacity>
+        </View>
+      ) : (
+        /* Restore tab — icon only */
+        <TouchableOpacity
+          onPress={() => setFabVisible(true)}
+          style={{
+            position: 'absolute',
+            right: 0,
+            bottom: 116,
+            backgroundColor: '#2a9d8f',
+            borderTopLeftRadius: 12,
+            borderBottomLeftRadius: 12,
+            paddingVertical: 10,
+            paddingLeft: 10,
+            paddingRight: 8,
+            elevation: 8,
+            shadowColor: '#000',
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+            shadowOffset: { width: 0, height: 2 }
+          }}
+        >
+          <Ionicons name="chatbubble-ellipses-outline" size={20} color="#fff" />
+        </TouchableOpacity>
+      )}
+    </View>
   );
 }
 
@@ -95,8 +185,8 @@ export default function App() {
             {props => (
               <LoginScreen
                 {...props}
-                setRole={role => {
-                  setRole(role);
+                setRole={nextRole => {
+                  setRole(ALLOWED_ROLES.includes(nextRole) ? nextRole : null);
                 }}
                 goToRegister={() => setShowRegister(true)}
                 users={users}
@@ -131,9 +221,28 @@ export default function App() {
             <Stack.Screen name="Main">
               {props => {
                 // Pantalla principal según rol
-                if (role === 'admin') return <AdminScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} />;
-                if (role === 'mechanic') return <MechanicScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} />;
-                return <UserTabs currentUsername={currentUsername} />;
+                if (role === 'admin') return <AdminScreen {...props} setRole={setRole} currentRole={role} goToOnline={() => props.navigation.navigate('OnlineUsers')} />;
+                if (role === 'mechanic') {
+                  return (
+                    <MechanicScreen
+                      {...props}
+                      setRole={setRole}
+                      goToGroups={() => props.navigation.navigate('Groups')}
+                      goToAppointments={() => props.navigation.navigate('MechanicAppointments')}
+                    />
+                  );
+                }
+                return (
+                  <UserTabs
+                    currentUsername={currentUsername}
+                    currentRole={role}
+                    rootNavigation={props.navigation}
+                    onLogout={() => {
+                      setRole(null);
+                      setCurrentUsername('');
+                    }}
+                  />
+                );
               }}
             </Stack.Screen>
             <Stack.Screen name="Groups">
@@ -141,6 +250,7 @@ export default function App() {
                 <GroupsScreen
                   {...props}
                   currentUser={currentUsername}
+                  currentRole={role}
                   goToGroupChat={(groupId, groupName) => props.navigation.navigate('GroupChat', { groupId, groupName })}
                   goBack={() => props.navigation.goBack()}
                 />
@@ -150,27 +260,42 @@ export default function App() {
               {props => (
                 <GroupChatScreen
                   {...props}
-                  route={{...props.route, params: { ...props.route.params, currentUser: currentUsername }}}
+                  route={{...props.route, params: { ...props.route.params, currentUser: currentUsername, currentRole: role }}}
                 />
               )}
             </Stack.Screen>
-            <Stack.Screen name="OnlineUsers">
-              {props => (
-                <OnlineUsersScreen
-                  {...props}
-                  currentUser={currentUsername}
-                  goToChat={otherUser => props.navigation.navigate('Chat', { otherUser })}
-                  goBack={() => props.navigation.goBack()}
-                />
-              )}
-            </Stack.Screen>
+            {role === 'admin' ? (
+              <Stack.Screen name="OnlineUsers">
+                {props => (
+                  <OnlineUsersScreen
+                    {...props}
+                    currentUser={currentUsername}
+                    currentRole={role}
+                    goBack={() => props.navigation.goBack()}
+                  />
+                )}
+              </Stack.Screen>
+            ) : null}
+            {role === 'mechanic' ? (
+              <Stack.Screen name="MechanicAppointments">
+                {props => (
+                  <MechanicAppointmentsScreen
+                    {...props}
+                    currentUsername={currentUsername}
+                    goBack={() => props.navigation.goBack()}
+                  />
+                )}
+              </Stack.Screen>
+            ) : null}
             <Stack.Screen name="Chat">
               {props => {
                 const otherUser = props.route.params?.otherUser || '';
                 return <ChatScreen {...props} user={currentUsername} mechanic={otherUser} goBack={() => props.navigation.goBack()} />;
               }}
             </Stack.Screen>
-            <Stack.Screen name="Cart" component={CartScreen} />
+            <Stack.Screen name="Cart">
+              {props => <CartScreen {...props} currentUsername={currentUsername} />}
+            </Stack.Screen>
           </>
         )}
       </Stack.Navigator>

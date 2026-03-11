@@ -1,19 +1,49 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CartContext } from '../CartContext';
+import { firestoreDb } from '../firebaseConfig';
+import { collection, addDoc } from 'firebase/firestore';
 
-export default function CartScreen({ navigation }) {
+export default function CartScreen({ navigation, currentUsername }) {
   const { cart, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useContext(CartContext);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cart.length === 0) {
       Alert.alert('Carrito Vacío', 'Añade productos antes de hacer pedido');
       return;
     }
-    Alert.alert('Pedido Confirmado', `Total: $${getTotalPrice()}\nTu pedido será procesado pronto.`);
-    clearCart();
-    navigation.goBack();
+
+    try {
+      setIsSavingOrder(true);
+      const subtotal = parseFloat(getTotalPrice());
+      const tax = parseFloat((subtotal * 0.13).toFixed(2));
+      const total = parseFloat((subtotal + tax).toFixed(2));
+
+      await addDoc(collection(firestoreDb, 'cartOrders'), {
+        username: currentUsername || 'anonimo',
+        items: cart.map(item => ({
+          id: item.id,
+          title: item.title,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        subtotal,
+        tax,
+        total,
+        status: 'Pendiente',
+        createdAt: new Date().toISOString()
+      });
+
+      Alert.alert('Pedido Confirmado', `Total: $${total.toFixed(2)}\nTu pedido será procesado pronto.`);
+      clearCart();
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Error', 'No se pudo guardar el pedido. Intenta de nuevo.');
+    } finally {
+      setIsSavingOrder(false);
+    }
   };
 
   return (
@@ -93,9 +123,9 @@ export default function CartScreen({ navigation }) {
               </View>
             </View>
 
-            <TouchableOpacity style={styles.checkoutBtn} onPress={handleCheckout}>
+            <TouchableOpacity style={[styles.checkoutBtn, isSavingOrder && styles.disabledBtn]} onPress={handleCheckout} disabled={isSavingOrder}>
               <Ionicons name="checkmark-circle" size={24} color="#fff" />
-              <Text style={styles.checkoutText}>Confirmar Pedido</Text>
+              <Text style={styles.checkoutText}>{isSavingOrder ? 'Guardando pedido...' : 'Confirmar Pedido'}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
@@ -274,6 +304,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 10,
     marginBottom: 10
+  },
+
+  disabledBtn: {
+    opacity: 0.7
   },
 
   checkoutText: {

@@ -3,11 +3,7 @@ import { db } from '../firebaseConfig';
 import { ref, get } from 'firebase/database';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Image } from 'react-native';
 
-const roles = [
-  { label: 'Administrador', value: 'admin' },
-  { label: 'Mecánico', value: 'mechanic' },
-  { label: 'Usuario', value: 'user' }
-];
+const ALLOWED_ROLES = ['admin', 'mechanic', 'user'];
 
 export default function LoginScreen({ setRole, goToRegister, users, goBack, setCurrentUsername }) {
   const [username, setUsername] = useState('');
@@ -15,21 +11,46 @@ export default function LoginScreen({ setRole, goToRegister, users, goBack, setC
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
+    const cleanUsername = username.trim();
+    if (!cleanUsername || !password) {
+      setError('Usuario y contraseña requeridos');
+      return;
+    }
+
     try {
-      const userRef = ref(db, `registeredUsers/${username}`);
+      const userRef = ref(db, `registeredUsers/${cleanUsername}`);
       const snapshot = await get(userRef);
       if (snapshot.exists()) {
         const user = snapshot.val();
+        const userRole = ALLOWED_ROLES.includes(user.role) ? user.role : 'user';
         if (user.password === password) {
-          setRole(user.role);
-          setCurrentUsername(username);
+          setRole(userRole);
+          setCurrentUsername(cleanUsername);
           setError('');
           return;
         }
       }
+
+      const localUser = users.find(u => u.username === cleanUsername && u.password === password);
+      if (localUser) {
+        const localRole = ALLOWED_ROLES.includes(localUser.role) ? localUser.role : 'user';
+        setRole(localRole);
+        setCurrentUsername(cleanUsername);
+        setError('');
+        return;
+      }
+
       setError('Usuario o contraseña incorrectos');
     } catch (e) {
-      setError('Error de conexión');
+      const localUser = users.find(u => u.username === cleanUsername && u.password === password);
+      if (localUser) {
+        const localRole = ALLOWED_ROLES.includes(localUser.role) ? localUser.role : 'user';
+        setRole(localRole);
+        setCurrentUsername(cleanUsername);
+        setError('');
+      } else {
+        setError('Error de conexión');
+      }
     }
   };
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, SafeAreaView } from 'react-native';
-import { db } from '../firebaseConfig';
+import { firestoreDb, db } from '../firebaseConfig';
 import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { ref, onValue } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -10,6 +11,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
   const [appointments, setAppointments] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [profileVehicle, setProfileVehicle] = useState(null);
 
   const [form, setForm] = useState({
     name: '',
@@ -44,7 +46,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
   const handleTimeChange = (event, selectedTime) => {
     setShowTimePicker(false);
     if (selectedTime) {
-      setForm({ ...form, time: formatTime(selectedTime) });
+      setForm(prev => ({ ...prev, time: formatTime(selectedTime) }));
     }
   };
 
@@ -52,13 +54,46 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
     loadAppointments();
   }, []);
 
+  useEffect(() => {
+    if (!currentUsername) return;
+    setForm(prev => ({ ...prev, email: currentUsername }));
+    const vRef = ref(db, `registeredUsers/${currentUsername}/vehiculo`);
+    const unsub = onValue(vRef, snapshot => {
+      const v = snapshot.val();
+      setProfileVehicle(v || null);
+      if (v) {
+        const vehicleStr = [v.marca, v.modelo, v.anno, v.tipo].filter(Boolean).join(' ');
+        setForm(prev => ({ ...prev, vehicle: vehicleStr, plate: v.placa || '' }));
+      }
+    });
+    return () => unsub();
+  }, [currentUsername]);
+
   const loadAppointments = async () => {
-    const querySnapshot = await getDocs(collection(db, 'appointments'));
-    const apps = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setAppointments(apps.filter(app => app.email === currentUsername));
+    try {
+      const querySnapshot = await getDocs(collection(firestoreDb, 'appointments'));
+      const apps = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setAppointments(apps.filter(app => app.email === currentUsername));
+    } catch (error) {
+      console.error('Error cargando citas:', error);
+    }
   };
 
   const handleSubmit = async () => {
+    if (!form.name.trim()) {
+      Alert.alert('Error', 'El nombre es requerido.');
+      return;
+    }
+
+    if (!form.date) {
+      Alert.alert('Error', 'Debes seleccionar una fecha.');
+      return;
+    }
+
+    if (!form.time) {
+      Alert.alert('Error', 'Debes seleccionar una hora.');
+      return;
+    }
 
     const today = new Date().toISOString().split('T')[0];
 
@@ -81,24 +116,33 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
       return;
     }
 
-    await addDoc(collection(db, 'appointments'), {
-      ...form,
-      status: 'Pendiente'
-    });
+    try {
+      await addDoc(collection(firestoreDb, 'appointments'), {
+        ...form,
+        email: currentUsername,
+        status: 'Pendiente'
+      });
 
-    Alert.alert('Éxito', 'Cita agendada correctamente.');
+      Alert.alert('Éxito', 'Cita agendada correctamente.');
 
-    setForm({
-      name: '',
-      email: '',
-      phone: '',
-      date: '',
-      time: '',
-      vehicle: '',
-      plate: ''
-    });
+      const vehicleStr = profileVehicle
+        ? [profileVehicle.marca, profileVehicle.modelo, profileVehicle.anno, profileVehicle.tipo].filter(Boolean).join(' ')
+        : '';
+      setForm({
+        name: '',
+        email: currentUsername,
+        phone: '',
+        date: '',
+        time: '',
+        vehicle: vehicleStr,
+        plate: profileVehicle?.placa || ''
+      });
 
-    loadAppointments();
+      loadAppointments();
+    } catch (error) {
+      console.error('Error al agendar cita:', error);
+      Alert.alert('Error', `No se pudo agendar la cita. Verifica tu conexión.\n\nDetalle: ${error.message}`);
+    }
   };
 
   const getStatusClass = (status) => {
@@ -170,15 +214,6 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
           onChangeText={(text) => setForm({ ...form, name: text })}
         />
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          value={form.email}
-          placeholder="Tu Email"
-          keyboardType="email-address"
-          onChangeText={(text) => setForm({ ...form, email: text })}
-        />
-
         <Text style={styles.label}>Teléfono</Text>
         <TextInput
           style={styles.input}
@@ -229,20 +264,24 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
         )}
 
         <Text style={styles.label}>Vehículo</Text>
-        <TextInput
-          style={styles.input}
-          value={form.vehicle}
-          placeholder="Marca / Modelo"
-          onChangeText={(text) => setForm({ ...form, vehicle: text })}
-        />
-
-        <Text style={styles.label}>Placa</Text>
-        <TextInput
-          style={styles.input}
-          value={form.plate}
-          placeholder="Placa"
-          onChangeText={(text) => setForm({ ...form, plate: text })}
-        />
+        {profileVehicle ? (
+          <View style={styles.vehicleInfoCard}>
+            <Ionicons name="car" size={16} color="#2a9d8f" style={{ marginRight: 8 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={styles.vehicleInfoText}>
+                {[profileVehicle.marca, profileVehicle.modelo, profileVehicle.anno, profileVehicle.tipo].filter(Boolean).join(' ')}
+              </Text>
+              {profileVehicle.placa ? (
+                <Text style={styles.vehiclePlateText}>Placa: {profileVehicle.placa}</Text>
+              ) : null}
+            </View>
+          </View>
+        ) : (
+          <View style={styles.vehicleInfoCard}>
+            <Ionicons name="alert-circle-outline" size={16} color="#e76f51" style={{ marginRight: 8 }} />
+            <Text style={styles.vehicleNoData}>No tienes vehículo registrado. Agrégalo en Mi Cuenta.</Text>
+          </View>
+        )}
 
         <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
           <Text style={styles.btnText}>Enviar Solicitud</Text>
@@ -357,6 +396,32 @@ const styles = StyleSheet.create({
   btnText: {
     color: '#fff',
     fontWeight: 'bold'
+  },
+
+  vehicleInfoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f3f8fa',
+    borderWidth: 1,
+    borderColor: '#d8e8ee',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15
+  },
+  vehicleInfoText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#12343b'
+  },
+  vehiclePlateText: {
+    fontSize: 12,
+    color: '#4d666c',
+    marginTop: 2
+  },
+  vehicleNoData: {
+    fontSize: 13,
+    color: '#e76f51',
+    flex: 1
   }
 
 });

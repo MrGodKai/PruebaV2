@@ -1,4 +1,4 @@
-import { db } from './firebaseConfig';
+import { firestoreDb } from './firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
 
 const initializeProducts = async () => {
@@ -11,7 +11,7 @@ const initializeProducts = async () => {
   ];
 
   for (const product of products) {
-    await addDoc(collection(db, 'products'), product);
+    await addDoc(collection(firestoreDb, 'products'), product);
   }
   console.log('Productos inicializados');
 };
