@@ -56,48 +56,6 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        <View style={styles.menu}>
-          <TouchableOpacity
-            style={styles.menuBtn}
-            onPress={() => navigation.navigate('About')}
-          >
-            <Ionicons name="information-circle" size={40} color="#000000" />
-            <Text style={styles.menuText}>Nuestra Historia</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuBtn}
-            onPress={() => navigation.navigate('Products')}
-          >
-            <Ionicons name="bag" size={40} color="#000000" />
-            <Text style={styles.menuText}>Productos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuBtn}
-            onPress={() => navigation.navigate('Services')}
-          >
-            <Ionicons name="build" size={40} color="#000000" />
-            <Text style={styles.menuText}>Servicios</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuBtn}
-            onPress={() => navigation.navigate('Appointment')}
-          >
-            <Ionicons name="calendar" size={40} color="#000000" />
-            <Text style={styles.menuText}>Citas</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.menuBtn}
-            onPress={() => navigation.navigate('Contact')}
-          >
-            <Ionicons name="call" size={40} color="#000000" />
-            <Text style={styles.menuText}>Contacto</Text>
-          </TouchableOpacity>
-        </View>
-
         <View style={styles.footer}>
           <Text style={styles.footerText}>Redes Sociales</Text>
 
@@ -209,32 +167,6 @@ const styles = StyleSheet.create({
 
   btnTextSecondary: {
     color: '#fff',
-    fontWeight: 'bold'
-  },
-
-  menu: {
-    padding: 20,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-around'
-  },
-
-  menuBtn: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    backgroundColor: '#f0f0f0',
-    padding: 20,
-    borderRadius: 12,
-    margin: 10,
-    width: '40%',
-    elevation: 5
-  },
-
-  menuText: {
-    fontSize: 14,
-    marginTop: 10,
-    color: '#000000',
-    textAlign: 'center',
     fontWeight: 'bold'
   },
 

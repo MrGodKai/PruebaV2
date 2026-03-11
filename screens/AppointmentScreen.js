@@ -115,7 +115,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
       <ScrollView style={styles.container}>
 
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}>
             <Ionicons name="arrow-back" size={24} color="#007bff" />
           </TouchableOpacity>
           <Text style={styles.headerText}>Citas</Text>

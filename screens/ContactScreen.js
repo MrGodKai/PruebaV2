@@ -25,7 +25,7 @@ export default function ContactScreen({ navigation }) {
     <SafeAreaView style={{flex:1}}>
       <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}>
           <Ionicons name="arrow-back" size={24} color="#007bff" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Contacto</Text>

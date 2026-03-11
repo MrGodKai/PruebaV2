@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import AdminScreen from './screens/AdminScreen';
@@ -21,6 +23,58 @@ import { CartProvider } from './CartContext';
 
 
 const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function UserTabs({ currentUsername }) {
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: '#007bff',
+        tabBarInactiveTintColor: '#666',
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          marginBottom: 3
+        },
+        tabBarItemStyle: {
+          paddingHorizontal: 2
+        },
+        tabBarStyle: {
+          position: 'absolute',
+          left: 10,
+          right: 10,
+          bottom: 14,
+          height: 66,
+          paddingBottom: 6,
+          paddingTop: 6,
+          borderRadius: 14
+        },
+        tabBarIcon: ({ color, size }) => {
+          let iconName = 'ellipse';
+
+          if (route.name === 'Home') iconName = 'home';
+          if (route.name === 'About') iconName = 'information-circle';
+          if (route.name === 'Products') iconName = 'cart';
+          if (route.name === 'Services') iconName = 'build';
+          if (route.name === 'Appointment') iconName = 'calendar';
+          if (route.name === 'Contact') iconName = 'call';
+
+          return <Ionicons name={iconName} size={22} color={color} />;
+        }
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ tabBarLabel: 'Inicio' }} />
+      <Tab.Screen name="Products" component={ProductsScreen} options={{ tabBarLabel: 'Productos' }} />
+      <Tab.Screen name="Services" component={ServicesScreen} options={{ tabBarLabel: 'Servicios' }} />
+      <Tab.Screen name="Appointment" options={{ tabBarLabel: 'Citas' }}>
+        {props => <AppointmentScreen {...props} currentUsername={currentUsername} />}
+      </Tab.Screen>
+      <Tab.Screen name="Contact" component={ContactScreen} options={{ tabBarLabel: 'Contacto' }} />
+      <Tab.Screen name="About" component={AboutScreen} options={{ tabBarLabel: 'Historia' }} />
+    </Tab.Navigator>
+  );
+}
 
 export default function App() {
   const [role, setRole] = useState(null);
@@ -79,7 +133,7 @@ export default function App() {
                 // Pantalla principal según rol
                 if (role === 'admin') return <AdminScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} />;
                 if (role === 'mechanic') return <MechanicScreen {...props} setRole={setRole} goToOnline={() => props.navigation.navigate('OnlineUsers')} />;
-                return <HomeScreen {...props} navigation={props.navigation} />;
+                return <UserTabs currentUsername={currentUsername} />;
               }}
             </Stack.Screen>
             <Stack.Screen name="Groups">
@@ -116,20 +170,7 @@ export default function App() {
                 return <ChatScreen {...props} user={currentUsername} mechanic={otherUser} goBack={() => props.navigation.goBack()} />;
               }}
             </Stack.Screen>
-            <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="About" component={AboutScreen} />
-            <Stack.Screen name="Products" component={ProductsScreen} />
             <Stack.Screen name="Cart" component={CartScreen} />
-            <Stack.Screen name="Services" component={ServicesScreen} />
-            <Stack.Screen name="Contact" component={ContactScreen} />
-            <Stack.Screen name="Appointment">
-              {props => (
-                <AppointmentScreen
-                  {...props}
-                  currentUsername={currentUsername}
-                />
-              )}
-            </Stack.Screen>
           </>
         )}
       </Stack.Navigator>
