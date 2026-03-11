@@ -13,10 +13,11 @@ export default function HomeScreen({ navigation }) {
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
-          <Ionicons name="car" size={30} color="#000000" />
-          <Text style={styles.headerText}>
-            Power<Text style={{ color: 'red' }}>CAR</Text>
-          </Text>
+          <Image
+            source={require('../assets/BannerPowerCar.png')}
+            style={styles.logo}
+            resizeMode="cover"
+          />
         </View>
 
         <View style={styles.home}>
@@ -82,11 +83,22 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
 
   header: {
-    backgroundColor: '#fff',
-    padding: 10,
+    backgroundColor: '#101317',
+    width: '100%',
+    marginHorizontal: 0,
+    marginTop: 0,
+    borderRadius: 0,
+    height: 180,
+    overflow: 'hidden',
     alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc'
+    justifyContent: 'center',
+    elevation: 0,
+    shadowOpacity: 0
+  },
+
+  logo: {
+    width: '100%',
+    height: '100%'
   },
 
   headerText: {

@@ -112,7 +112,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
 
         <View style={styles.header}>
           <TouchableOpacity onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}>
@@ -259,6 +259,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     padding: 20
+  },
+
+  contentContainer: {
+    paddingBottom: 100
   },
 
   header: {
