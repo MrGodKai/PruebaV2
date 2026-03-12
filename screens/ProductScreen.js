@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, SafeAreaView } from 'react-native';
-import { firestoreDb } from '../firebaseConfig';
-import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { ref, get } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ProductScreen({ navigation }) {
@@ -12,8 +12,9 @@ export default function ProductScreen({ navigation }) {
   }, []);
 
   const loadProducts = async () => {
-    const querySnapshot = await getDocs(collection(firestoreDb, 'products'));
-    const prods = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const snapshot = await get(ref(db, 'products'));
+    const data = snapshot.val() || {};
+    const prods = Object.entries(data).map(([id, value]) => ({ id, ...value }));
     setProducts(prods);
   };
 

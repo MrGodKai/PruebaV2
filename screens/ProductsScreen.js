@@ -1,9 +1,11 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CartContext } from '../CartContext';
+import { db } from '../firebaseConfig';
+import { ref, get } from 'firebase/database';
 
-const products = [
+const fallbackProducts = [
   { id: 1, icon: 'water', title: 'Aceite para Motor', description: 'Aceite sintético de alta calidad para mejorar el rendimiento del motor.', price: '$15 - $25' },
   { id: 2, icon: 'funnel', title: 'Filtro de Aire', description: 'Filtro de aire para mantener el motor limpio.', price: '$10 - $20' },
   { id: 3, icon: 'battery-charging', title: 'Batería', description: 'Batería de larga duración para tu auto.', price: '$80 - $150' },
@@ -12,8 +14,48 @@ const products = [
   { id: 6, icon: 'settings', title: 'Correas', description: 'Correas de serpentín y distribución.', price: '$25 - $50' }
 ];
 
+const productIcons = ['water', 'funnel', 'battery-charging', 'shield-checkmark', 'flower', 'settings'];
+
 export default function ProductsScreen({ navigation }) {
   const { cart, addToCart } = useContext(CartContext);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [usedFallback, setUsedFallback] = useState(false);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const mapDbProducts = (entries) => {
+    return entries.map(([id, item], idx) => ({
+      id,
+      icon: productIcons[idx % productIcons.length],
+      title: item.name || 'Producto',
+      description: item.description || 'Sin descripcion',
+      price: item.price || '$0'
+    }));
+  };
+
+  const loadProducts = async () => {
+    setLoading(true);
+    try {
+      const snapshot = await get(ref(db, 'products'));
+      const data = snapshot.val() || {};
+      const dbProducts = mapDbProducts(Object.entries(data));
+      if (dbProducts.length > 0) {
+        setProducts(dbProducts);
+        setUsedFallback(false);
+      } else {
+        setProducts(fallbackProducts);
+        setUsedFallback(true);
+      }
+    } catch (error) {
+      setProducts(fallbackProducts);
+      setUsedFallback(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddToCart = (product) => {
     addToCart(product);
@@ -35,6 +77,13 @@ export default function ProductsScreen({ navigation }) {
         </View>
 
         <Text style={styles.title}>Nuestros Productos</Text>
+
+        {loading ? <Text style={styles.infoText}>Cargando productos...</Text> : null}
+        {usedFallback ? (
+          <Text style={styles.warningText}>
+            Mostrando catalogo local temporal. Verifica la configuracion de Realtime Database.
+          </Text>
+        ) : null}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Catálogo de Productos</Text>
@@ -170,5 +219,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 14
+  },
+
+  infoText: {
+    textAlign: 'center',
+    color: '#555',
+    marginBottom: 10
+  },
+
+  warningText: {
+    textAlign: 'center',
+    color: '#b26a00',
+    marginBottom: 12,
+    fontSize: 12
   }
 });

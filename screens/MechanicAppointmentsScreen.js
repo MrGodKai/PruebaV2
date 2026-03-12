@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { firestoreDb } from '../firebaseConfig';
+import { db } from '../firebaseConfig';
+import { ref, get, update } from 'firebase/database';
 
 const APPOINTMENT_STATUSES = ['Pendiente', 'En revision', 'Listo'];
 
@@ -23,8 +23,9 @@ export default function MechanicAppointmentsScreen({ currentUsername, goBack }) 
   const loadAppointments = async () => {
     try {
       setLoading(true);
-      const querySnapshot = await getDocs(collection(firestoreDb, 'appointments'));
-      const apps = querySnapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
+      const snapshot = await get(ref(db, 'appointments'));
+      const data = snapshot.val() || {};
+      const apps = Object.entries(data).map(([id, value]) => ({ id, ...value }));
       setAppointments(apps);
     } catch (error) {
       Alert.alert('Error', 'No se pudieron cargar las citas.');
@@ -39,7 +40,7 @@ export default function MechanicAppointmentsScreen({ currentUsername, goBack }) 
 
   const updateAppointment = async (id, payload) => {
     try {
-      await updateDoc(doc(firestoreDb, 'appointments', id), payload);
+      await update(ref(db, `appointments/${id}`), payload);
       await loadAppointments();
     } catch (error) {
       Alert.alert('Error', 'No se pudo actualizar la cita.');

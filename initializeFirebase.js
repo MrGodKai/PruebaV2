@@ -1,5 +1,5 @@
-import { firestoreDb } from './firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
+import { db } from './firebaseConfig';
+import { ref, get, push } from 'firebase/database';
 
 const initializeProducts = async () => {
   const products = [
@@ -10,8 +10,15 @@ const initializeProducts = async () => {
     { name: 'Llantas', status: 'Disponible', description: 'Llantas de alta durabilidad para todo tipo de carretera.', price: '$100 - $200', image: 'https://media.licdn.com/dms/image/v2/D4E12AQEvvrAa5mKR8Q/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1696884157654?e=2147483647&v=beta&t=VyBL87EHcITjND3nYflH9Q1pnQyC2jV1TiH3JQf-2bI' }
   ];
 
+  const productsRef = ref(db, 'products');
+  const snapshot = await get(productsRef);
+  if (snapshot.exists()) {
+    console.log('Productos ya existentes, no se inicializan de nuevo.');
+    return;
+  }
+
   for (const product of products) {
-    await addDoc(collection(firestoreDb, 'products'), product);
+    await push(productsRef, product);
   }
   console.log('Productos inicializados');
 };

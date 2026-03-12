@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, SafeAreaView } from 'react-native';
-import { firestoreDb, db } from '../firebaseConfig';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
-import { ref, onValue } from 'firebase/database';
+import { db } from '../firebaseConfig';
+import { ref, onValue, get, push } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -22,6 +21,17 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
     vehicle: '',
     plate: ''
   });
+
+  const getDatabaseErrorMessage = (error) => {
+    const raw = `${error?.code || ''} ${error?.message || ''}`.toLowerCase();
+    if (raw.includes('permission-denied')) {
+      return 'No tienes permisos para acceder a la base de datos.';
+    }
+    if (raw.includes('unavailable') || raw.includes('network')) {
+      return 'No se pudo conectar a Firebase. Verifica tu internet e intenta de nuevo.';
+    }
+    return 'No se pudo completar la operacion con la base de datos.';
+  };
 
   const formatDate = (date) => {
     const year = date.getFullYear();
@@ -71,11 +81,13 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
 
   const loadAppointments = async () => {
     try {
-      const querySnapshot = await getDocs(collection(firestoreDb, 'appointments'));
-      const apps = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const snapshot = await get(ref(db, 'appointments'));
+      const data = snapshot.val() || {};
+      const apps = Object.entries(data).map(([id, value]) => ({ id, ...value }));
       setAppointments(apps.filter(app => app.email === currentUsername));
     } catch (error) {
       console.error('Error cargando citas:', error);
+      Alert.alert('Error de base de datos', getDatabaseErrorMessage(error));
     }
   };
 
@@ -117,7 +129,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
     }
 
     try {
-      await addDoc(collection(firestoreDb, 'appointments'), {
+      await push(ref(db, 'appointments'), {
         ...form,
         email: currentUsername,
         status: 'Pendiente'
@@ -141,7 +153,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
       loadAppointments();
     } catch (error) {
       console.error('Error al agendar cita:', error);
-      Alert.alert('Error', `No se pudo agendar la cita. Verifica tu conexión.\n\nDetalle: ${error.message}`);
+      Alert.alert('Error', `${getDatabaseErrorMessage(error)}\n\nDetalle: ${error.message}`);
     }
   };
 

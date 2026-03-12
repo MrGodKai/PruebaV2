@@ -2,12 +2,23 @@ import React, { useContext, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CartContext } from '../CartContext';
-import { firestoreDb } from '../firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { ref, push } from 'firebase/database';
 
 export default function CartScreen({ navigation, currentUsername }) {
   const { cart, removeFromCart, updateQuantity, getTotalPrice, clearCart } = useContext(CartContext);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+
+  const getDatabaseErrorMessage = (error) => {
+    const raw = `${error?.code || ''} ${error?.message || ''}`.toLowerCase();
+    if (raw.includes('permission-denied')) {
+      return 'No tienes permisos para guardar pedidos.';
+    }
+    if (raw.includes('unavailable') || raw.includes('network')) {
+      return 'No se pudo conectar con Firebase. Revisa tu internet y vuelve a intentar.';
+    }
+    return 'No se pudo guardar el pedido en base de datos.';
+  };
 
   const handleCheckout = async () => {
     if (cart.length === 0) {
@@ -21,7 +32,7 @@ export default function CartScreen({ navigation, currentUsername }) {
       const tax = parseFloat((subtotal * 0.13).toFixed(2));
       const total = parseFloat((subtotal + tax).toFixed(2));
 
-      await addDoc(collection(firestoreDb, 'cartOrders'), {
+      await push(ref(db, 'cartOrders'), {
         username: currentUsername || 'anonimo',
         items: cart.map(item => ({
           id: item.id,
@@ -40,7 +51,7 @@ export default function CartScreen({ navigation, currentUsername }) {
       clearCart();
       navigation.goBack();
     } catch (error) {
-      Alert.alert('Error', 'No se pudo guardar el pedido. Intenta de nuevo.');
+      Alert.alert('Error', getDatabaseErrorMessage(error));
     } finally {
       setIsSavingOrder(false);
     }

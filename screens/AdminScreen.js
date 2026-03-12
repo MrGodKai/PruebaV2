@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Alert, TextInput, ActivityIndicator, SafeAreaView } from 'react-native';
-import { firestoreDb } from '../firebaseConfig';
-import { collection, getDocs, doc, updateDoc, deleteDoc, addDoc } from 'firebase/firestore';
+import { db } from '../firebaseConfig';
+import { ref, get, update, remove, push } from 'firebase/database';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -23,6 +23,17 @@ export default function AdminScreen({ setRole, currentRole, goToOnline }) {
   const [editingProductId, setEditingProductId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [dashboardWarning, setDashboardWarning] = useState('');
+
+  const getDatabaseErrorMessage = (error) => {
+    const raw = `${error?.code || ''} ${error?.message || ''}`.toLowerCase();
+    if (raw.includes('permission-denied')) {
+      return 'No tienes permisos sobre la base de datos.';
+    }
+    if (raw.includes('unavailable') || raw.includes('network')) {
+      return 'No hay conexion estable con Firebase.';
+    }
+    return 'Operacion de base de datos no completada.';
+  };
 
   useEffect(() => {
     if (currentRole === 'admin') {
@@ -51,53 +62,72 @@ export default function AdminScreen({ setRole, currentRole, goToOnline }) {
     if (failedSections.length > 0) {
       const warning = `No se pudo cargar: ${failedSections.join(', ')}.`;
       setDashboardWarning(warning);
-      Alert.alert('Carga parcial', `${warning} Revisa reglas/permisos de Firestore.`);
+      Alert.alert('Carga parcial', `${warning} Revisa reglas/permisos de Realtime Database.`);
     }
 
     setLoading(false);
   };
 
   const loadAppointments = async () => {
-    const querySnapshot = await getDocs(collection(firestoreDb, 'appointments'));
-    const apps = querySnapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+    const snapshot = await get(ref(db, 'appointments'));
+    const data = snapshot.val() || {};
+    const apps = Object.entries(data).map(([id, value]) => ({ id, ...value }));
     setAppointments(apps);
   };
 
   const loadProducts = async () => {
-    const querySnapshot = await getDocs(collection(firestoreDb, 'products'));
-    const prods = querySnapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+    const snapshot = await get(ref(db, 'products'));
+    const data = snapshot.val() || {};
+    const prods = Object.entries(data).map(([id, value]) => ({ id, ...value }));
     setProducts(prods);
   };
 
   const loadOrders = async () => {
-    const querySnapshot = await getDocs(collection(firestoreDb, 'cartOrders'));
-    const loadedOrders = querySnapshot.docs.map(item => ({ id: item.id, ...item.data() }));
+    const snapshot = await get(ref(db, 'cartOrders'));
+    const data = snapshot.val() || {};
+    const loadedOrders = Object.entries(data).map(([id, value]) => ({ id, ...value }));
     loadedOrders.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
     setOrders(loadedOrders);
   };
 
   const changeAppointmentStatus = async (id, newStatus) => {
-    await updateDoc(doc(firestoreDb, 'appointments', id), { status: newStatus });
-    loadAppointments();
+    try {
+      await update(ref(db, `appointments/${id}`), { status: newStatus });
+      loadAppointments();
+    } catch (error) {
+      Alert.alert('Error', getDatabaseErrorMessage(error));
+    }
   };
 
   const deleteAppointment = async (id) => {
-    await deleteDoc(doc(firestoreDb, 'appointments', id));
-    loadAppointments();
+    try {
+      await remove(ref(db, `appointments/${id}`));
+      loadAppointments();
+    } catch (error) {
+      Alert.alert('Error', getDatabaseErrorMessage(error));
+    }
   };
 
   const changeProductStatus = async (id, newStatus) => {
-    await updateDoc(doc(firestoreDb, 'products', id), { status: newStatus });
-    loadProducts();
+    try {
+      await update(ref(db, `products/${id}`), { status: newStatus });
+      loadProducts();
+    } catch (error) {
+      Alert.alert('Error', getDatabaseErrorMessage(error));
+    }
   };
 
   const deleteProduct = async (id) => {
-    await deleteDoc(doc(firestoreDb, 'products', id));
-    if (editingProductId === id) {
-      setEditingProductId(null);
-      setProductForm(initialProductForm);
+    try {
+      await remove(ref(db, `products/${id}`));
+      if (editingProductId === id) {
+        setEditingProductId(null);
+        setProductForm(initialProductForm);
+      }
+      loadProducts();
+    } catch (error) {
+      Alert.alert('Error', getDatabaseErrorMessage(error));
     }
-    loadProducts();
   };
 
   const editProduct = (product) => {
@@ -134,26 +164,38 @@ export default function AdminScreen({ setRole, currentRole, goToOnline }) {
       image: productForm.image.trim()
     };
 
-    if (editingProductId) {
-      await updateDoc(doc(firestoreDb, 'products', editingProductId), payload);
-      Alert.alert('Producto actualizado', 'Los cambios fueron guardados.');
-    } else {
-      await addDoc(collection(firestoreDb, 'products'), payload);
-      Alert.alert('Producto creado', 'El producto fue agregado correctamente.');
-    }
+    try {
+      if (editingProductId) {
+        await update(ref(db, `products/${editingProductId}`), payload);
+        Alert.alert('Producto actualizado', 'Los cambios fueron guardados.');
+      } else {
+        await push(ref(db, 'products'), payload);
+        Alert.alert('Producto creado', 'El producto fue agregado correctamente.');
+      }
 
-    clearProductForm();
-    loadProducts();
+      clearProductForm();
+      loadProducts();
+    } catch (error) {
+      Alert.alert('Error', getDatabaseErrorMessage(error));
+    }
   };
 
   const changeOrderStatus = async (id, newStatus) => {
-    await updateDoc(doc(firestoreDb, 'cartOrders', id), { status: newStatus });
-    loadOrders();
+    try {
+      await update(ref(db, `cartOrders/${id}`), { status: newStatus });
+      loadOrders();
+    } catch (error) {
+      Alert.alert('Error', getDatabaseErrorMessage(error));
+    }
   };
 
   const deleteOrder = async (id) => {
-    await deleteDoc(doc(firestoreDb, 'cartOrders', id));
-    loadOrders();
+    try {
+      await remove(ref(db, `cartOrders/${id}`));
+      loadOrders();
+    } catch (error) {
+      Alert.alert('Error', getDatabaseErrorMessage(error));
+    }
   };
 
   const getBadgeStyle = (status) => {
