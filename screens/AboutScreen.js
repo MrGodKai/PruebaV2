@@ -1,86 +1,81 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function AboutScreen({ navigation }) {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0f172a' }}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}>
-            <Ionicons name="arrow-back" size={24} color="#007bff" />
+          <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('Home')}>
+            <Ionicons name="arrow-back" size={22} color="#fff" />
           </TouchableOpacity>
-          <Text style={[styles.headerText, { color: '#000' }]}>Nuestra Historia</Text>
+          <Text style={styles.headerText}>Nuestra Historia</Text>
         </View>
 
-        <Text style={[styles.title, { color: '#000' }]}>
-          Sobre Power<Text style={{ color: 'red' }}>CAR</Text>
-        </Text>
+        <Text style={styles.title}>Sobre Power<Text style={styles.brandRed}>CAR</Text></Text>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: '#000' }]}>Nuestra Misión</Text>
-          <Text style={[styles.text, { color: '#000' }]}>
-            En PowerCAR, nos comprometemos a proporcionar servicios de reparación y mantenimiento automotriz de la más alta calidad. Nuestro equipo de profesionales certificados trabaja con las mejores tecnologías para garantizar que tu vehículo esté en perfecto estado.
+          <Text style={styles.sectionTitle}>Nuestra Misión</Text>
+          <Text style={styles.text}>
+            En Power<Text style={styles.brandInline}>CAR</Text> nos comprometemos a brindar servicios automotrices confiables, transparentes y de alta calidad,
+            apoyados por tecnología moderna y un equipo técnico especializado.
           </Text>
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: '#000' }]}>Nuestros Valores</Text>
+          <Text style={styles.sectionTitle}>Nuestros Valores</Text>
+
           <View style={styles.valueItem}>
-            <Ionicons name="shield-checkmark" size={24} color="#ff4500" />
-            <Text style={[styles.valueText, { color: '#000' }]}>Calidad: Garantizamos el mejor servicio</Text>
+            <View style={styles.iconContainer}>
+              <Ionicons name="shield-checkmark" size={24} color="#ff3b30" />
+            </View>
+            <Text style={styles.valueText}><Text style={styles.bold}>Calidad:</Text> garantía en cada servicio.</Text>
           </View>
+
           <View style={styles.valueItem}>
-            <Ionicons name="people" size={24} color="#ff4500" />
-            <Text style={[styles.valueText, { color: '#000' }]}>Profesionalismo: Equipo capacitado y certificado</Text>
+            <View style={styles.iconContainer}>
+              <Ionicons name="people" size={24} color="#ff3b30" />
+            </View>
+            <Text style={styles.valueText}><Text style={styles.bold}>Profesionalismo:</Text> personal capacitado y certificado.</Text>
           </View>
+
           <View style={styles.valueItem}>
-            <Ionicons name="time" size={24} color="#ff4500" />
-            <Text style={[styles.valueText, { color: '#000' }]}>Puntualidad: Entrega en el tiempo acordado</Text>
+            <View style={styles.iconContainer}>
+              <Ionicons name="time" size={24} color="#ff3b30" />
+            </View>
+            <Text style={styles.valueText}><Text style={styles.bold}>Puntualidad:</Text> tiempos claros y cumplidos.</Text>
           </View>
+
           <View style={styles.valueItem}>
-            <Ionicons name="cash" size={24} color="#ff4500" />
-            <Text style={[styles.valueText, { color: '#000' }]}>Precios justos: Transparencia en nuestros costos</Text>
+            <View style={styles.iconContainer}>
+              <Ionicons name="cash" size={24} color="#ff3b30" />
+            </View>
+            <Text style={styles.valueText}><Text style={styles.bold}>Transparencia:</Text> precios justos y comunicación directa.</Text>
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: '#000' }]}>Nuestro Equipo</Text>
-          <Text style={[styles.text, { color: '#000' }]}>
-            Contamos con un equipo de mecánicos expertos con más de 15 años de experiencia en el ramo automotriz. Nuestros profesionales se mantienen constantemente actualizados con las últimas tecnologías y técnicas de reparación.
-          </Text>
-        </View>
+          <Text style={styles.sectionTitle}>Servicios Destacados</Text>
 
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: '#000' }]}>Servicios Destacados</Text>
-          <View style={styles.serviceList}>
-            <Text style={[styles.serviceItem, { color: '#000' }]}>✓ Mantenimiento general</Text>
-            <Text style={[styles.serviceItem, { color: '#000' }]}>✓ Diagnóstico computarizado</Text>
-            <Text style={[styles.serviceItem, { color: '#000' }]}>✓ Reparación de motores</Text>
-            <Text style={[styles.serviceItem, { color: '#000' }]}>✓ Sistema de frenos</Text>
-            <Text style={[styles.serviceItem, { color: '#000' }]}>✓ Suspensión y alineación</Text>
-            <Text style={[styles.serviceItem, { color: '#000' }]}>✓ Sistema eléctrico</Text>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: '#000' }]}>Ubicación y Contacto</Text>
-          <Text style={[styles.text, { color: '#000' }]}>
-            <Ionicons name="location" size={16} color="#ff4500" /> San José, Costa Rica
-          </Text>
-          <Text style={[styles.text, { color: '#000' }]}>
-            <Ionicons name="call" size={16} color="#ff4500" /> Tel: 8888-8888
-          </Text>
-          <Text style={[styles.text, { color: '#000' }]}>
-            <Ionicons name="mail" size={16} color="#ff4500" /> Email: taller@powercar.com
-          </Text>
+          {[
+            'Mantenimiento general',
+            'Diagnóstico computarizado',
+            'Reparación de motores',
+            'Sistema de frenos y suspensión',
+            'Sistema eléctrico',
+            'Cambio de fluidos'
+          ].map((service, idx) => (
+            <View key={idx} style={styles.serviceItem}>
+              <Image source={require('../assets/check.png')} style={styles.checkIcon} />
+              <Text style={styles.serviceText}>{service}</Text>
+            </View>
+          ))}
         </View>
 
         <TouchableOpacity style={styles.contactBtn} onPress={() => navigation.navigate('Contact')}>
-          <Text style={[styles.contactText, { color: '#000' }]}>Contáctanos</Text>
+          <Text style={styles.contactText}>Contáctanos</Text>
         </TouchableOpacity>
-
-        <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -89,7 +84,7 @@ export default function AboutScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0f172a',
     padding: 20
   },
 
@@ -99,76 +94,110 @@ const styles = StyleSheet.create({
     marginBottom: 20
   },
 
+  backBtn: {
+    backgroundColor: '#1e293b',
+    padding: 10,
+    borderRadius: 10
+  },
+
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#000',
-    marginLeft: 10
+    marginLeft: 10,
+    color: '#fff'
   },
 
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#000',
     textAlign: 'center',
-    marginBottom: 30
+    marginBottom: 30,
+    color: '#fff'
+  },
+
+  brandRed: {
+    color: '#ff3b30'
+  },
+
+  brandInline: {
+    color: '#ff3b30',
+    fontWeight: '700'
   },
 
   section: {
     marginBottom: 25,
     padding: 15,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10
+    backgroundColor: '#1e293b',
+    borderRadius: 12
   },
 
   sectionTitle: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 10
+    marginBottom: 12,
+    color: '#ff3b30'
   },
 
   text: {
     fontSize: 16,
-    color: '#000',
-    lineHeight: 24
+    lineHeight: 24,
+    color: '#cbd5f5'
   },
 
   valueItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    paddingVertical: 8
+    marginBottom: 14
+  },
+
+  iconContainer: {
+    backgroundColor: '#fff',
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12
   },
 
   valueText: {
     fontSize: 16,
-    color: '#000',
-    marginLeft: 12,
-    flex: 1
+    flex: 1,
+    color: '#fff'
   },
 
-  serviceList: {
-    marginTop: 10
+  bold: {
+    fontWeight: 'bold'
   },
 
   serviceItem: {
-    fontSize: 16,
-    color: '#000',
-    marginVertical: 6,
-    lineHeight: 22
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10
+  },
+
+  serviceText: {
+    color: '#cbd5f5',
+    fontSize: 16
+  },
+
+  checkIcon: {
+    width: 18,
+    height: 18,
+    marginRight: 10,
+    resizeMode: 'contain'
   },
 
   contactBtn: {
-    backgroundColor: '#28a745',
+    backgroundColor: '#ff3b30',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 20
+    marginTop: 10
   },
 
   contactText: {
-    color: '#000',
+    color: '#fff',
     fontWeight: 'bold',
     fontSize: 16
   }

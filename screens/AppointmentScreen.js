@@ -6,7 +6,6 @@ import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function AppointmentScreen({ navigation, currentUsername }) {
-
   const [appointments, setAppointments] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -22,17 +21,6 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
     plate: ''
   });
 
-  const getDatabaseErrorMessage = (error) => {
-    const raw = `${error?.code || ''} ${error?.message || ''}`.toLowerCase();
-    if (raw.includes('permission-denied')) {
-      return 'No tienes permisos para acceder a la base de datos.';
-    }
-    if (raw.includes('unavailable') || raw.includes('network')) {
-      return 'No se pudo conectar a Firebase. Verifica tu internet e intenta de nuevo.';
-    }
-    return 'No se pudo completar la operacion con la base de datos.';
-  };
-
   const formatDate = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -43,7 +31,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
   const handleDateChange = (event, selectedDate) => {
     setShowDatePicker(false);
     if (selectedDate) {
-      setForm({ ...form, date: formatDate(selectedDate) });
+      setForm((prev) => ({ ...prev, date: formatDate(selectedDate) }));
     }
   };
 
@@ -56,7 +44,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
   const handleTimeChange = (event, selectedTime) => {
     setShowTimePicker(false);
     if (selectedTime) {
-      setForm(prev => ({ ...prev, time: formatTime(selectedTime) }));
+      setForm((prev) => ({ ...prev, time: formatTime(selectedTime) }));
     }
   };
 
@@ -66,16 +54,21 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
 
   useEffect(() => {
     if (!currentUsername) return;
-    setForm(prev => ({ ...prev, email: currentUsername }));
+
+    setForm((prev) => ({ ...prev, email: currentUsername }));
+
     const vRef = ref(db, `registeredUsers/${currentUsername}/vehiculo`);
-    const unsub = onValue(vRef, snapshot => {
+
+    const unsub = onValue(vRef, (snapshot) => {
       const v = snapshot.val();
       setProfileVehicle(v || null);
+
       if (v) {
         const vehicleStr = [v.marca, v.modelo, v.anno, v.tipo].filter(Boolean).join(' ');
-        setForm(prev => ({ ...prev, vehicle: vehicleStr, plate: v.placa || '' }));
+        setForm((prev) => ({ ...prev, vehicle: vehicleStr, plate: v.placa || '' }));
       }
     });
+
     return () => unsub();
   }, [currentUsername]);
 
@@ -84,10 +77,9 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
       const snapshot = await get(ref(db, 'appointments'));
       const data = snapshot.val() || {};
       const apps = Object.entries(data).map(([id, value]) => ({ id, ...value }));
-      setAppointments(apps.filter(app => app.email === currentUsername));
+      setAppointments(apps.filter((app) => app.email === currentUsername));
     } catch (error) {
-      console.error('Error cargando citas:', error);
-      Alert.alert('Error de base de datos', getDatabaseErrorMessage(error));
+      Alert.alert('Error', 'No se pudieron cargar las citas.');
     }
   };
 
@@ -119,9 +111,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
       return;
     }
 
-    const exists = appointments.some(
-      app => app.date === form.date && app.time === form.time
-    );
+    const exists = appointments.some((app) => app.date === form.date && app.time === form.time);
 
     if (exists) {
       Alert.alert('Error', 'Ya hay una cita en esa fecha y hora.');
@@ -140,6 +130,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
       const vehicleStr = profileVehicle
         ? [profileVehicle.marca, profileVehicle.modelo, profileVehicle.anno, profileVehicle.tipo].filter(Boolean).join(' ')
         : '';
+
       setForm({
         name: '',
         email: currentUsername,
@@ -152,69 +143,63 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
 
       loadAppointments();
     } catch (error) {
-      console.error('Error al agendar cita:', error);
-      Alert.alert('Error', `${getDatabaseErrorMessage(error)}\n\nDetalle: ${error.message}`);
+      Alert.alert('Error', 'No se pudo agendar la cita.');
     }
   };
 
   const getStatusClass = (status) => {
     switch (status) {
-      case 'Pendiente': return styles.pending;
-      case 'En revisión': return styles.inReview;
-      case 'Listo': return styles.ready;
-      default: return styles.pending;
+      case 'Pendiente':
+        return styles.pending;
+      case 'En revision':
+      case 'En revisión':
+        return styles.inReview;
+      case 'Listo':
+        return styles.ready;
+      default:
+        return styles.pending;
     }
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-
         <View style={styles.header}>
           <TouchableOpacity onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}>
-            <Ionicons name="arrow-back" size={24} color="#007bff" />
+            <Ionicons name="arrow-back" size={26} color="#fff" />
           </TouchableOpacity>
+
           <Text style={styles.headerText}>Citas</Text>
         </View>
 
         <Text style={styles.subtitle}>
-          A continuación verás el estado de tus citas y datos registrados.
+          Consulta el estado de tus citas y agenda nuevos servicios para tu vehículo.
         </Text>
 
-        <ScrollView horizontal>
-
-          <View style={styles.table}>
-
-            <View style={styles.tableHeader}>
-              <Text style={styles.tableHeaderText}>Nombre</Text>
-              <Text style={styles.tableHeaderText}>Email</Text>
-              <Text style={styles.tableHeaderText}>Fecha</Text>
-              <Text style={styles.tableHeaderText}>Hora</Text>
-              <Text style={styles.tableHeaderText}>Vehículo</Text>
-              <Text style={styles.tableHeaderText}>Placa</Text>
-              <Text style={styles.tableHeaderText}>Estado</Text>
-            </View>
-
-            {appointments.map(app => (
-              <View key={app.id} style={styles.tableRow}>
-
-                <Text style={styles.tableCell}>{app.name}</Text>
-                <Text style={styles.tableCell}>{app.email}</Text>
-                <Text style={styles.tableCell}>{app.date}</Text>
-                <Text style={styles.tableCell}>{app.time}</Text>
-                <Text style={styles.tableCell}>{app.vehicle}</Text>
-                <Text style={styles.tableCell}>{app.plate}</Text>
-
-                <Text style={[styles.tableCell, getStatusClass(app.status)]}>
-                  {app.status}
-                </Text>
-
+        <View style={styles.tableCard}>
+          <ScrollView horizontal>
+            <View>
+              <View style={styles.tableHeader}>
+                <Text style={styles.tableHeaderText}>Nombre</Text>
+                <Text style={styles.tableHeaderText}>Fecha</Text>
+                <Text style={styles.tableHeaderText}>Hora</Text>
+                <Text style={styles.tableHeaderText}>Vehículo</Text>
+                <Text style={styles.tableHeaderText}>Estado</Text>
               </View>
-            ))}
 
-          </View>
+              {appointments.map((app) => (
+                <View key={app.id} style={styles.tableRow}>
+                  <Text style={styles.tableCell}>{app.name}</Text>
+                  <Text style={styles.tableCell}>{app.date}</Text>
+                  <Text style={styles.tableCell}>{app.time}</Text>
+                  <Text style={styles.tableCell}>{app.vehicle}</Text>
 
-        </ScrollView>
+                  <Text style={[styles.tableCell, getStatusClass(app.status)]}>{app.status}</Text>
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
 
         <Text style={styles.sectionTitle}>Agendar Cita</Text>
 
@@ -223,6 +208,7 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
           style={styles.input}
           value={form.name}
           placeholder="Tu Nombre"
+          placeholderTextColor="#94a3b8"
           onChangeText={(text) => setForm({ ...form, name: text })}
         />
 
@@ -231,209 +217,200 @@ export default function AppointmentScreen({ navigation, currentUsername }) {
           style={styles.input}
           value={form.phone}
           placeholder="Tu Teléfono"
+          placeholderTextColor="#94a3b8"
           keyboardType="phone-pad"
           onChangeText={(text) => setForm({ ...form, phone: text })}
         />
 
         <Text style={styles.label}>Fecha</Text>
         <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-          <Text style={form.date ? styles.inputText : styles.placeholderText}>
-            {form.date || 'Seleccionar fecha'}
-          </Text>
+          <Text style={form.date ? styles.inputText : styles.placeholderText}>{form.date || 'Seleccionar fecha'}</Text>
         </TouchableOpacity>
+
         {showDatePicker && (
           <DateTimePicker
             value={form.date ? new Date(`${form.date}T00:00:00`) : new Date()}
             mode="date"
-            display="default"
             minimumDate={new Date()}
             onChange={handleDateChange}
           />
         )}
 
         <Text style={styles.label}>Hora</Text>
+
         <TouchableOpacity style={styles.input} onPress={() => setShowTimePicker(true)}>
-          <Text style={form.time ? styles.inputText : styles.placeholderText}>
-            {form.time || 'Seleccionar hora'}
-          </Text>
+          <Text style={form.time ? styles.inputText : styles.placeholderText}>{form.time || 'Seleccionar hora'}</Text>
         </TouchableOpacity>
+
         {showTimePicker && (
           <DateTimePicker
-            value={(() => {
-              if (form.time) {
-                const [h, m] = form.time.split(':');
-                const d = new Date();
-                d.setHours(parseInt(h), parseInt(m), 0, 0);
-                return d;
-              }
-              return new Date();
-            })()}
+            value={new Date()}
             mode="time"
-            display="default"
             is24Hour={true}
             onChange={handleTimeChange}
           />
         )}
 
         <Text style={styles.label}>Vehículo</Text>
+
         {profileVehicle ? (
-          <View style={styles.vehicleInfoCard}>
-            <Ionicons name="car" size={16} color="#2a9d8f" style={{ marginRight: 8 }} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.vehicleInfoText}>
+          <View style={styles.vehicleCard}>
+            <Ionicons name="car" size={18} color="#ff3b30" />
+
+            <View style={{ marginLeft: 10 }}>
+              <Text style={styles.vehicleText}>
                 {[profileVehicle.marca, profileVehicle.modelo, profileVehicle.anno, profileVehicle.tipo].filter(Boolean).join(' ')}
               </Text>
-              {profileVehicle.placa ? (
-                <Text style={styles.vehiclePlateText}>Placa: {profileVehicle.placa}</Text>
-              ) : null}
+
+              <Text style={styles.vehiclePlate}>Placa: {profileVehicle.placa}</Text>
             </View>
           </View>
         ) : (
-          <View style={styles.vehicleInfoCard}>
-            <Ionicons name="alert-circle-outline" size={16} color="#e76f51" style={{ marginRight: 8 }} />
-            <Text style={styles.vehicleNoData}>No tienes vehículo registrado. Agrégalo en Mi Cuenta.</Text>
+          <View style={styles.vehicleCard}>
+            <Ionicons name="alert-circle" size={18} color="#f87171" />
+
+            <Text style={styles.vehicleNoData}>No tienes vehículo registrado.</Text>
           </View>
         )}
 
         <TouchableOpacity style={styles.btn} onPress={handleSubmit}>
-          <Text style={styles.btnText}>Enviar Solicitud</Text>
+          <Text style={styles.btnText}>Agendar Cita</Text>
         </TouchableOpacity>
-
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#0f172a',
     padding: 20
   },
 
   contentContainer: {
-    paddingBottom: 100
+    paddingBottom: 120
   },
 
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10
+    marginBottom: 15
   },
 
   headerText: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
+    color: '#fff',
     marginLeft: 10
   },
 
   subtitle: {
-    fontSize: 16,
-    marginBottom: 20,
-    textAlign: 'center'
+    color: '#cbd5f5',
+    textAlign: 'center',
+    marginBottom: 20
   },
 
-  table: {
-    marginBottom: 20
+  tableCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 14,
+    padding: 10,
+    marginBottom: 30
   },
 
   tableHeader: {
     flexDirection: 'row',
-    backgroundColor: '#f0f0f0',
-    padding: 10
+    borderBottomWidth: 1,
+    borderBottomColor: '#334155',
+    paddingBottom: 8
   },
 
   tableHeaderText: {
     flex: 1,
+    color: '#94a3b8',
     fontWeight: 'bold',
-    textAlign: 'center'
+    textAlign: 'center',
+    fontSize: 12
   },
 
   tableRow: {
     flexDirection: 'row',
-    padding: 10,
+    paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc'
+    borderBottomColor: '#334155'
   },
 
   tableCell: {
     flex: 1,
-    textAlign: 'center'
+    textAlign: 'center',
+    color: '#e2e8f0',
+    fontSize: 12
   },
 
-  pending: { color: 'orange' },
-  inReview: { color: 'blue' },
-  ready: { color: 'green' },
+  pending: { color: '#f59e0b' },
+  inReview: { color: '#3b82f6' },
+  ready: { color: '#22c55e' },
 
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginVertical: 10,
+    color: '#fff',
+    marginBottom: 10,
     textAlign: 'center'
   },
 
   label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginTop: 10
+    color: '#cbd5f5',
+    marginBottom: 5
   },
 
   input: {
-    width: '100%',
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
+    backgroundColor: '#1e293b',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 45,
+    justifyContent: 'center',
     marginBottom: 15,
-    paddingHorizontal: 10,
-    justifyContent: 'center'
+    color: '#fff'
   },
 
-  inputText: {
-    color: '#000'
+  inputText: { color: '#fff' },
+  placeholderText: { color: '#94a3b8' },
+
+  vehicleCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#1e293b',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 15
   },
 
-  placeholderText: {
-    color: '#999'
+  vehicleText: {
+    color: '#fff',
+    fontWeight: 'bold'
+  },
+
+  vehiclePlate: {
+    color: '#94a3b8',
+    fontSize: 12
+  },
+
+  vehicleNoData: {
+    color: '#f87171',
+    marginLeft: 8
   },
 
   btn: {
-    backgroundColor: '#007bff',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: '#ff3b30',
+    paddingVertical: 16,
+    borderRadius: 14,
     alignItems: 'center'
   },
 
   btnText: {
     color: '#fff',
-    fontWeight: 'bold'
-  },
-
-  vehicleInfoCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f3f8fa',
-    borderWidth: 1,
-    borderColor: '#d8e8ee',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 15
-  },
-  vehicleInfoText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#12343b'
-  },
-  vehiclePlateText: {
-    fontSize: 12,
-    color: '#4d666c',
-    marginTop: 2
-  },
-  vehicleNoData: {
-    fontSize: 13,
-    color: '#e76f51',
-    flex: 1
+    fontWeight: 'bold',
+    fontSize: 16
   }
-
 });

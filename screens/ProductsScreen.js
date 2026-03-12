@@ -1,236 +1,278 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert } from 'react-native';
+import React, { useContext } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CartContext } from '../CartContext';
-import { db } from '../firebaseConfig';
-import { ref, get } from 'firebase/database';
 
-const fallbackProducts = [
-  { id: 1, icon: 'water', title: 'Aceite para Motor', description: 'Aceite sintético de alta calidad para mejorar el rendimiento del motor.', price: '$15 - $25' },
-  { id: 2, icon: 'funnel', title: 'Filtro de Aire', description: 'Filtro de aire para mantener el motor limpio.', price: '$10 - $20' },
-  { id: 3, icon: 'battery-charging', title: 'Batería', description: 'Batería de larga duración para tu auto.', price: '$80 - $150' },
-  { id: 4, icon: 'shield-checkmark', title: 'Pastillas de Freno', description: 'Pastillas de freno de alta calidad y durabilidad.', price: '$20 - $40' },
-  { id: 5, icon: 'flower', title: 'Llantas', description: 'Llantas resistentes para diferentes terrenos.', price: '$60 - $120' },
-  { id: 6, icon: 'settings', title: 'Correas', description: 'Correas de serpentín y distribución.', price: '$25 - $50' }
+const products = [
+{
+id: 1,
+title: 'Aceite para Motor',
+description: 'Aceite sintético premium que protege el motor y mejora el rendimiento.',
+price: '₡7.500 - ₡12.500',
+icon: require('../assets/products/aceite.png')
+},
+{
+id: 2,
+title: 'Filtro de Aire',
+description: 'Filtro de aire de alto rendimiento que mejora la eficiencia del combustible.',
+price: '₡5.000 - ₡10.000',
+icon: require('../assets/products/filtro.png')
+},
+{
+id: 3,
+title: 'Batería',
+description: 'Batería automotriz confiable con excelente potencia de arranque.',
+price: '₡40.000 - ₡75.000',
+icon: require('../assets/products/bateria.png')
+},
+{
+id: 4,
+title: 'Pastillas de Freno',
+description: 'Pastillas de freno de alto desempeño y gran seguridad.',
+price: '₡10.000 - ₡20.000',
+icon: require('../assets/products/pastillas.jpg')
+},
+{
+id: 5,
+title: 'Llantas',
+description: 'Llantas resistentes con gran tracción y durabilidad.',
+price: '₡35.000 - ₡70.000',
+icon: require('../assets/products/llantas.png')
+},
+{
+id: 6,
+title: 'Correas',
+description: 'Correas de distribución de alta resistencia.',
+price: '₡12.000 - ₡25.000',
+icon: require('../assets/products/correas.jpg')
+}
 ];
 
-const productIcons = ['water', 'funnel', 'battery-charging', 'shield-checkmark', 'flower', 'settings'];
-
 export default function ProductsScreen({ navigation }) {
-  const { cart, addToCart } = useContext(CartContext);
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [usedFallback, setUsedFallback] = useState(false);
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
+const { cart, addToCart } = useContext(CartContext);
 
-  const mapDbProducts = (entries) => {
-    return entries.map(([id, item], idx) => ({
-      id,
-      icon: productIcons[idx % productIcons.length],
-      title: item.name || 'Producto',
-      description: item.description || 'Sin descripcion',
-      price: item.price || '$0'
-    }));
-  };
+const handleAddToCart = (product) => {
+addToCart(product);
+Alert.alert('Producto agregado', `${product.title} fue añadido al carrito`);
+};
 
-  const loadProducts = async () => {
-    setLoading(true);
-    try {
-      const snapshot = await get(ref(db, 'products'));
-      const data = snapshot.val() || {};
-      const dbProducts = mapDbProducts(Object.entries(data));
-      if (dbProducts.length > 0) {
-        setProducts(dbProducts);
-        setUsedFallback(false);
-      } else {
-        setProducts(fallbackProducts);
-        setUsedFallback(true);
-      }
-    } catch (error) {
-      setProducts(fallbackProducts);
-      setUsedFallback(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+return (
 
-  const handleAddToCart = (product) => {
-    addToCart(product);
-    Alert.alert('Éxito', `${product.title} agregado al carrito`);
-  };
+<SafeAreaView style={{flex:1, backgroundColor:'#0f172a'}}>
 
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => (navigation.canGoBack() ? navigation.goBack() : navigation.navigate('Home'))}>
-            <Ionicons name="arrow-back" size={24} color="#007bff" />
-          </TouchableOpacity>
-          <Text style={styles.headerText}>Productos</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Cart')} style={styles.cartBadgeContainer}>
-            <Ionicons name="cart" size={24} color="#007bff" />
-            {cart.length > 0 && <Text style={styles.cartBadge}>{cart.length}</Text>}
-          </TouchableOpacity>
-        </View>
+<ScrollView
+style={styles.container}
+showsVerticalScrollIndicator={false}
+contentContainerStyle={{paddingBottom:45}}
+>
 
-        <Text style={styles.title}>Nuestros Productos</Text>
+<View style={styles.header}>
 
-        {loading ? <Text style={styles.infoText}>Cargando productos...</Text> : null}
-        {usedFallback ? (
-          <Text style={styles.warningText}>
-            Mostrando catalogo local temporal. Verifica la configuracion de Realtime Database.
-          </Text>
-        ) : null}
+<TouchableOpacity
+onPress={() => navigation.navigate('Home')}
+style={styles.backBtn}
+>
+<Ionicons name="arrow-back" size={22} color="#fff"/>
+</TouchableOpacity>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Catálogo de Productos</Text>
-          <Text style={styles.text}>
-            Disponemos de una selección de productos de alta calidad para el mantenimiento y reparación de tu vehículo. Todos nuestros productos están garantizados y cuentan con certificación.
-          </Text>
-        </View>
+<Text style={styles.headerText}>Productos</Text>
 
-        {products.map((product) => (
-          <View key={product.id} style={styles.section}>
-            <View style={styles.productHeader}>
-              <Ionicons name={product.icon} size={32} color="#ff4500" />
-              <View style={{ flex: 1, marginLeft: 15 }}>
-                <Text style={styles.productTitle}>{product.title}</Text>
-                <Text style={styles.productPrice}>{product.price}</Text>
-              </View>
-            </View>
-            <Text style={styles.text}>{product.description}</Text>
-            <TouchableOpacity 
-              style={styles.addToCartBtn}
-              onPress={() => handleAddToCart(product)}
-            >
-              <Ionicons name="add-circle" size={20} color="#fff" />
-              <Text style={styles.addToCartText}>Agregar al Carrito</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+<TouchableOpacity
+onPress={() => navigation.navigate('Cart')}
+style={styles.cartContainer}
+>
+<Ionicons name="cart" size={24} color="#fff"/>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </SafeAreaView>
-  );
+{cart.length > 0 && (
+<View style={styles.cartBadge}>
+<Text style={styles.cartBadgeText}>{cart.length}</Text>
+</View>
+)}
+
+</TouchableOpacity>
+
+</View>
+
+<Text style={styles.title}>Catálogo de Productos</Text>
+
+<Text style={styles.subtitle}>
+Explora nuestra selección de repuestos y accesorios automotrices de alta calidad diseñados
+para mantener tu vehículo funcionando en perfectas condiciones.
+</Text>
+
+{products.map((product) => (
+
+<View key={product.id} style={styles.productCard}>
+
+<View style={styles.productTop}>
+
+<View style={styles.iconContainer}>
+<Image
+source={product.icon}
+style={styles.productIcon}
+/>
+</View>
+
+<View style={styles.productInfo}>
+<Text style={styles.productTitle}>{product.title}</Text>
+<Text style={styles.productPrice}>{product.price}</Text>
+</View>
+
+</View>
+
+<Text style={styles.description}>{product.description}</Text>
+
+<TouchableOpacity
+style={styles.cartBtn}
+onPress={() => handleAddToCart(product)}
+>
+
+<Ionicons name="cart-outline" size={20} color="#fff"/>
+<Text style={styles.cartBtnText}>Agregar al carrito</Text>
+
+</TouchableOpacity>
+
+</View>
+
+))}
+
+</ScrollView>
+
+</SafeAreaView>
+
+);
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20
-  },
 
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    justifyContent: 'space-between'
-  },
+container:{
+flex:1,
+padding:20
+},
 
-  headerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center'
-  },
+header:{
+flexDirection:'row',
+alignItems:'center',
+justifyContent:'space-between',
+marginBottom:20
+},
 
-  cartBadgeContainer: {
-    position: 'relative'
-  },
+backBtn:{
+backgroundColor:'#1e293b',
+padding:10,
+borderRadius:10
+},
 
-  cartBadge: {
-    position: 'absolute',
-    top: -5,
-    right: -5,
-    backgroundColor: '#ff4500',
-    color: '#fff',
-    borderRadius: 10,
-    width: 18,
-    height: 18,
-    textAlign: 'center',
-    fontSize: 12,
-    fontWeight: 'bold'
-  },
+headerText:{
+fontSize:22,
+fontWeight:'bold',
+color:'#fff'
+},
 
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#000',
-    textAlign: 'center',
-    marginBottom: 30
-  },
+cartContainer:{
+position:'relative',
+backgroundColor:'#1e293b',
+padding:10,
+borderRadius:10
+},
 
-  section: {
-    marginBottom: 20,
-    padding: 15,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10
-  },
+cartBadge:{
+position:'absolute',
+top:-6,
+right:-6,
+backgroundColor:'#ff3b30',
+width:18,
+height:18,
+borderRadius:9,
+alignItems:'center',
+justifyContent:'center'
+},
 
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: 10
-  },
+cartBadgeText:{
+color:'#fff',
+fontSize:11,
+fontWeight:'bold'
+},
 
-  productHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10
-  },
+title:{
+fontSize:28,
+fontWeight:'bold',
+color:'#fff',
+marginBottom:8
+},
 
-  productTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000'
-  },
+subtitle:{
+color:'#cbd5f5',
+marginBottom:25,
+lineHeight:20
+},
 
-  productPrice: {
-    fontSize: 16,
-    color: '#ff4500',
-    fontWeight: 'bold',
-    marginTop: 4
-  },
+productCard:{
+backgroundColor:'#1e293b',
+padding:18,
+borderRadius:16,
+marginBottom:20,
+elevation:6
+},
 
-  text: {
-    fontSize: 16,
-    color: '#000',
-    lineHeight: 24,
-    marginBottom: 10
-  },
+productTop:{
+flexDirection:'row',
+alignItems:'center',
+marginBottom:10
+},
 
-  addToCartBtn: {
-    backgroundColor: '#28a745',
-    padding: 12,
-    borderRadius: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8
-  },
+iconContainer:{
+backgroundColor:'#fff',
+width:50,
+height:50,
+borderRadius:12,
+alignItems:'center',
+justifyContent:'center',
+marginRight:15
+},
 
-  addToCartText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14
-  },
+productIcon:{
+width:30,
+height:30,
+resizeMode:'contain'
+},
 
-  infoText: {
-    textAlign: 'center',
-    color: '#555',
-    marginBottom: 10
-  },
+productInfo:{
+flex:1
+},
 
-  warningText: {
-    textAlign: 'center',
-    color: '#b26a00',
-    marginBottom: 12,
-    fontSize: 12
-  }
+productTitle:{
+fontSize:18,
+fontWeight:'bold',
+color:'#fff'
+},
+
+productPrice:{
+color:'#ff3b30',
+fontWeight:'bold',
+marginTop:4
+},
+
+description:{
+color:'#cbd5f5',
+marginBottom:15,
+lineHeight:20
+},
+
+cartBtn:{
+backgroundColor:'#ff3b30',
+padding:12,
+borderRadius:12,
+flexDirection:'row',
+alignItems:'center',
+justifyContent:'center'
+},
+
+cartBtnText:{
+color:'#fff',
+fontWeight:'bold',
+marginLeft:8
+}
+
 });

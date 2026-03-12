@@ -228,7 +228,7 @@ export default function AdminScreen({ setRole, currentRole, goToOnline }) {
       >
       <View style={styles.hero}>
         <View>
-          <Text style={styles.heroEyebrow}>PowerCar Control Center</Text>
+          <Text style={styles.heroEyebrow}>Power<Text style={styles.brandCar}>CAR</Text> Control Center</Text>
           <Text style={styles.heroTitle}>Panel Administrativo</Text>
           <Text style={styles.heroSubtitle}>Gestiona citas, productos y pedidos del carrito desde un solo lugar.</Text>
         </View>
@@ -478,6 +478,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'uppercase',
     marginBottom: 4
+  },
+  brandCar: {
+    color: '#ff3b30'
   },
   heroTitle: {
     color: '#fff',

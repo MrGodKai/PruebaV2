@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Text } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, TouchableOpacity, Text, Animated, PanResponder, Dimensions } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -30,7 +30,30 @@ const Tab = createBottomTabNavigator();
 const ALLOWED_ROLES = ['admin', 'mechanic', 'user'];
 
 function UserTabs({ currentUsername, currentRole, rootNavigation, onLogout }) {
-  const [fabVisible, setFabVisible] = useState(true);
+  const [fabVisible, setFabVisible] = useState(false);
+  const [tabMenuVisible, setTabMenuVisible] = useState(false);
+  
+  // Draggable FAB - solo movimiento vertical
+  const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: Animated.event([null, { dy: pan.y }], {
+        useNativeDriver: false,
+      }),
+      onPanResponderRelease: () => {
+        pan.flattenOffset();
+      },
+      onPanResponderGrant: () => {
+        pan.setOffset({
+          x: pan.x._value,
+          y: pan.y._value,
+        });
+      },
+    })
+  ).current;
+
   return (
     <View style={{ flex: 1 }}>
       <Tab.Navigator
@@ -54,7 +77,8 @@ function UserTabs({ currentUsername, currentRole, rootNavigation, onLogout }) {
             height: 66,
             paddingBottom: 6,
             paddingTop: 6,
-            borderRadius: 14
+            borderRadius: 14,
+            display: tabMenuVisible ? 'flex' : 'none'
           },
           tabBarIcon: ({ color, size }) => {
             let iconName = 'ellipse';
@@ -91,13 +115,34 @@ function UserTabs({ currentUsername, currentRole, rootNavigation, onLogout }) {
         <Tab.Screen name="About" component={AboutScreen} options={{ tabBarLabel: 'Historia' }} />
       </Tab.Navigator>
 
+      <TouchableOpacity
+        onPress={() => setTabMenuVisible(prev => !prev)}
+        style={{
+          position: 'absolute',
+          right: 14,
+          bottom: tabMenuVisible ? 90 : 18,
+          width: 44,
+          height: 44,
+          borderRadius: 22,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#1e293b',
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOpacity: 0.25,
+          shadowRadius: 5,
+          shadowOffset: { width: 0, height: 2 }
+        }}
+      >
+        <Ionicons name={tabMenuVisible ? 'chevron-down' : 'grid'} size={20} color="#fff" />
+      </TouchableOpacity>
+
       {fabVisible ? (
-        /* Main tab */
-        <View
+        <Animated.View
           style={{
             position: 'absolute',
             right: 0,
-            bottom: 116,
+            bottom: 80,
             flexDirection: 'row',
             alignItems: 'center',
             backgroundColor: '#2a9d8f',
@@ -107,8 +152,10 @@ function UserTabs({ currentUsername, currentRole, rootNavigation, onLogout }) {
             shadowColor: '#000',
             shadowOpacity: 0.25,
             shadowRadius: 5,
-            shadowOffset: { width: 0, height: 2 }
+            shadowOffset: { width: 0, height: 2 },
+            transform: [{ translateY: pan.y }],
           }}
+          {...panResponder.panHandlers}
         >
           <TouchableOpacity
             onPress={() => rootNavigation.navigate('Groups')}
@@ -126,7 +173,6 @@ function UserTabs({ currentUsername, currentRole, rootNavigation, onLogout }) {
             </Text>
           </TouchableOpacity>
 
-          {/* Hide button */}
           <TouchableOpacity
             onPress={() => setFabVisible(false)}
             style={{
@@ -137,30 +183,37 @@ function UserTabs({ currentUsername, currentRole, rootNavigation, onLogout }) {
           >
             <Ionicons name="close" size={16} color="rgba(255,255,255,0.8)" />
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       ) : (
-        /* Restore tab — icon only */
-        <TouchableOpacity
-          onPress={() => setFabVisible(true)}
+        <Animated.View
           style={{
             position: 'absolute',
             right: 0,
-            bottom: 116,
-            backgroundColor: '#2a9d8f',
-            borderTopLeftRadius: 12,
-            borderBottomLeftRadius: 12,
-            paddingVertical: 10,
-            paddingLeft: 10,
-            paddingRight: 8,
-            elevation: 8,
-            shadowColor: '#000',
-            shadowOpacity: 0.2,
-            shadowRadius: 4,
-            shadowOffset: { width: 0, height: 2 }
+            bottom: 80,
+            transform: [{ translateY: pan.y }],
           }}
+          {...panResponder.panHandlers}
         >
-          <Ionicons name="chatbubble-ellipses-outline" size={20} color="#fff" />
-        </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setFabVisible(true)}
+            style={{
+              position: 'relative',
+              backgroundColor: '#2a9d8f',
+              borderTopLeftRadius: 12,
+              borderBottomLeftRadius: 12,
+              paddingVertical: 10,
+              paddingLeft: 10,
+              paddingRight: 8,
+              elevation: 8,
+              shadowColor: '#000',
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+              shadowOffset: { width: 0, height: 2 }
+            }}
+          >
+            <Ionicons name="chatbubble-ellipses-outline" size={20} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
       )}
     </View>
   );
